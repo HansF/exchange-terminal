@@ -1,0 +1,6 @@
+{
+  "name": "POS Exchange Tickets",
+  "description": "Create printable black-and-white receipts for offerings and demands at events.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

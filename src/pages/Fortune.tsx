@@ -1,0 +1,141 @@
+import { ArrowLeft, Printer, Sparkles } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { FORTUNES } from '../fortunes';
+
+interface Props {
+  onBack: () => void;
+}
+
+type PrintStatus = 'idle' | 'loading' | 'success' | 'error';
+
+export default function Fortune({ onBack }: Props) {
+  const [status, setStatus] = useState<PrintStatus>('idle');
+  const [error, setError] = useState('');
+  const [fortune, setFortune] = useState<string>('');
+  const ticketRef = useRef<HTMLDivElement>(null);
+
+  const printFortune = async () => {
+    const drawn = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+    setFortune(drawn);
+    setStatus('loading');
+    setError('');
+
+    // Wait one frame for React to render the ticket with the new fortune
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+
+    try {
+      const el = ticketRef.current;
+      if (!el) throw new Error('Ticket element not found');
+
+      const canvas = await html2canvas(el, { scale: 4, backgroundColor: '#FFFFFF', logging: false });
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+          const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          const val = brightness > 128 ? 255 : 0;
+          data[i] = val; data[i + 1] = val; data[i + 2] = val;
+        }
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      const response = await fetch('/api/print', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: canvas.toDataURL('image/png') }),
+      });
+      const result = await response.json();
+      if (!response.ok || result.error) throw new Error(result.error || 'Unknown error');
+
+      setStatus('success');
+      setTimeout(() => setStatus('idle'), 3000);
+    } catch (err) {
+      setStatus('error');
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  const now = new Date().toLocaleString('en-US', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  });
+
+  return (
+    <div className="min-h-screen bg-[#FFE135] flex flex-col font-mono p-4 md:p-8">
+      <header className="max-w-2xl mx-auto w-full mb-12">
+        <div className="flex items-start gap-4">
+          <button
+            onClick={onBack}
+            className="mt-1 bg-white border-2 border-black font-bold px-3 py-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1 text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+          <div>
+            <h1 className="text-3xl md:text-5xl font-black text-black tracking-tighter bg-[#FF90E8] border-4 border-black inline-block px-4 py-2 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-1">
+              THE ORACLE
+            </h1>
+            <p className="text-black font-bold mt-4 text-lg bg-white border-2 border-black p-2 inline-block shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-1">
+              Press the button. Receive your truth.
+            </p>
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-2xl mx-auto w-full flex flex-col items-center gap-4">
+        <button
+          onClick={printFortune}
+          disabled={status === 'loading'}
+          className={`border-4 border-black font-black text-xl py-5 px-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest ${status === 'error' ? 'bg-red-400 text-black' : 'bg-black text-[#FFE135]'}`}
+          title={status === 'error' ? error : 'Draw and print your fortune'}
+        >
+          {status === 'loading' ? <Sparkles className="w-6 h-6 animate-spin" /> : <Printer className="w-6 h-6" />}
+          {status === 'loading' ? 'Printing…' :
+           status === 'success' ? 'Fortune Sent!' :
+           status === 'error'   ? 'Error — Try Again' :
+           'Draw Your Fortune'}
+        </button>
+        {status === 'error' && (
+          <p className="text-xs font-bold bg-red-400 border-2 border-black px-3 py-1 max-w-sm text-center">{error}</p>
+        )}
+      </div>
+
+      {/* Hidden fortune ticket — rendered off-screen for html2canvas capture */}
+      <div className="fixed top-0 left-[-9999px] pointer-events-none" aria-hidden="true">
+        <div
+          ref={ticketRef}
+          className="bg-white text-black font-mono w-[320px] p-5 box-border"
+          style={{ fontSmoothing: 'none', WebkitFontSmoothing: 'none' } as React.CSSProperties}
+        >
+          {/* Header */}
+          <div className="text-center border-b-[3px] border-black pb-3 mb-5">
+            <div className="text-[10px] font-bold tracking-[0.3em] uppercase mb-1">✦ ✦ ✦</div>
+            <div className="text-2xl font-black uppercase tracking-tight">THE ORACLE</div>
+            <div className="text-[10px] font-bold tracking-widest mt-1">YOUR FORTUNE AWAITS</div>
+          </div>
+
+          {/* Fortune text */}
+          <div className="mb-6 py-2">
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
+            <p className="text-base font-bold leading-snug italic">{fortune}</p>
+          </div>
+
+          {/* Decorative divider */}
+          <div className="text-center text-sm font-bold my-4 tracking-widest">
+            — ✦ —
+          </div>
+
+          {/* Footer */}
+          <div className="border-t-[2px] border-black pt-3 text-center">
+            <div className="text-[10px] font-bold mb-2">{now}</div>
+            <div className="text-[11px] font-black tracking-widest bg-black text-white px-2 py-1 inline-block">
+              ORACLE DISPATCH
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
