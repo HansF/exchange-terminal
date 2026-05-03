@@ -9,14 +9,24 @@ interface CameraBridgeProps {
 export const CameraBridge: React.FC<CameraBridgeProps> = ({ onCapture, isProcessing }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [isActive, setIsActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const stopStream = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setIsActive(false);
+  }, []);
+
   const startCamera = useCallback(async () => {
+    stopStream();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1080 } },
       });
+      streamRef.current = stream;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setIsActive(true);
@@ -26,16 +36,12 @@ export const CameraBridge: React.FC<CameraBridgeProps> = ({ onCapture, isProcess
       console.error('Camera Access Error:', err);
       setError('Unable to access camera. Please check permissions.');
     }
-  }, []);
+  }, [stopStream]);
 
   useEffect(() => {
     startCamera();
-    return () => {
-      if (videoRef.current?.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
-      }
-    };
-  }, [startCamera]);
+    return stopStream;
+  }, [startCamera, stopStream]);
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
