@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config();
+
 const express = require('express');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -47,6 +49,45 @@ app.post('/api/print', async (req, res) => {
 
   } finally {
     try { fs.unlinkSync(tmpFile); } catch (_) {}
+  }
+});
+
+app.post('/api/caricature', async (req, res) => {
+  const { base64Image } = req.body;
+  if (!base64Image) return res.status(400).json({ error: 'Missing base64Image' });
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured on server' });
+
+  try {
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-preview-05-20',
+      contents: {
+        parts: [
+          { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
+          {
+            text: `Convert this photo into a stylized caricature.
+Style: Bold black line art on a pure white background.
+Exaggerate facial features in a fun way.
+Output ONLY black and white lines, no shades of gray, no gradients, no shadows.
+The style should be minimalist and suitable for a low-resolution thermal ticket printer.
+High contrast, thick strokes.`,
+          },
+        ],
+      },
+    });
+
+    for (const part of response.candidates?.[0]?.content?.parts || []) {
+      if (part.inlineData) {
+        return res.json({ imageData: `data:image/png;base64,${part.inlineData.data}` });
+      }
+    }
+    throw new Error('No image returned by Gemini');
+  } catch (err) {
+    console.error('[caricature error]', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 

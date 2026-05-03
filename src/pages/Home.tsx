@@ -1,7 +1,7 @@
-import { Receipt, Sparkles, ArrowRight } from 'lucide-react';
+import { Receipt, Sparkles, ArrowRight, Camera } from 'lucide-react';
 
 interface Props {
-  onNavigate: (page: 'exchange' | 'fortune') => void;
+  onNavigate: (page: 'exchange' | 'fortune' | 'stencilcam') => void;
 }
 
 export default function Home({ onNavigate }: Props) {
@@ -16,7 +16,7 @@ export default function Home({ onNavigate }: Props) {
         </p>
       </header>
 
-      <div className="max-w-4xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-4xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         <button
           onClick={() => onNavigate('exchange')}
           className="group bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-left flex flex-col gap-4"
@@ -25,10 +25,10 @@ export default function Home({ onNavigate }: Props) {
             <div className="bg-[#E0FF4F] border-2 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <Receipt className="w-8 h-8 text-black" />
             </div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter">Exchange Tickets</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter">Exchange Tickets</h2>
           </div>
           <p className="text-sm font-medium text-gray-700 leading-relaxed">
-            Generate printable black-and-white receipts for offerings & demands. Print directly to the thermal printer.
+            Generate printable receipts for offerings & demands. Prints to thermal printer.
           </p>
           <div className="flex items-center gap-2 font-black uppercase text-sm mt-auto pt-4 border-t-2 border-black group-hover:gap-3 transition-all">
             Open <ArrowRight className="w-4 h-4" />
@@ -43,10 +43,28 @@ export default function Home({ onNavigate }: Props) {
             <div className="bg-white border-2 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
               <Sparkles className="w-8 h-8 text-black" />
             </div>
-            <h2 className="text-2xl font-black uppercase tracking-tighter">The Oracle</h2>
+            <h2 className="text-xl font-black uppercase tracking-tighter">The Oracle</h2>
           </div>
           <p className="text-sm font-medium text-gray-700 leading-relaxed">
-            Draw a fortune. 131 camp-specific prophecies awaiting your curiosity. Heed or ignore at your own peril.
+            Draw a fortune from 131 camp-specific prophecies. Prints directly.
+          </p>
+          <div className="flex items-center gap-2 font-black uppercase text-sm mt-auto pt-4 border-t-2 border-black group-hover:gap-3 transition-all">
+            Open <ArrowRight className="w-4 h-4" />
+          </div>
+        </button>
+
+        <button
+          onClick={() => onNavigate('stencilcam')}
+          className="group bg-[#E0FF4F] border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-left flex flex-col gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-white border-2 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+              <Camera className="w-8 h-8 text-black" />
+            </div>
+            <h2 className="text-xl font-black uppercase tracking-tighter">StencilCam</h2>
+          </div>
+          <p className="text-sm font-medium text-gray-700 leading-relaxed">
+            AI caricatures from your camera. Pure 1-bit art, thermal-ready.
           </p>
           <div className="flex items-center gap-2 font-black uppercase text-sm mt-auto pt-4 border-t-2 border-black group-hover:gap-3 transition-all">
             Open <ArrowRight className="w-4 h-4" />
