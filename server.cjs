@@ -83,12 +83,18 @@ app.post('/api/caricature', async (req, res) => {
         parts: [
           { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
           {
-            text: `Transform this person into a ${creature.name} caricature.
-Keep their face recognisable but merge it with these ${creature.name} traits: ${creature.traits}.
-Exaggerate both their own facial features AND the creature traits for maximum comic effect.
-Style: Bold black line art on a pure white background.
-Output ONLY black and white lines — no shades of gray, no gradients, no fills, no shadows.
-Minimalist, high contrast, thick strokes. Suitable for a low-resolution thermal ticket printer.`,
+            text: `Transform this person into a ${creature.name} in the illustration style of Fiep Westendorp.
+Keep the face loosely recognisable but reinterpret it as a ${creature.name} with these traits: ${creature.traits}.
+
+Style rules — follow these strictly:
+- Fiep Westendorp's iconic Dutch children's book style (Jip en Janneke)
+- Thin, fluid, slightly wobbly hand-drawn lines — NOT thick or bold
+- Round simplified face with tiny dot or dash eyes, small button nose, simple curved mouth
+- Flat silhouette with minimal interior detail; clothing suggested by a few simple lines or tiny patterns (dots, stripes)
+- Playful, innocent, slightly naive quality — charming not scary
+- Pure black lines on a white background only — no gray, no shading, no gradients, no fills
+- Leave generous white space; do not fill areas with black
+- Suitable for thermal receipt printer output`,
           },
         ],
       },
