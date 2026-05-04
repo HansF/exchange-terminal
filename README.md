@@ -16,5 +16,6 @@ View your app in AI Studio: https://ai.studio/apps/bb518ed8-0a2b-4eb6-906b-367b0
 1. Install dependencies:
    `npm install`
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+3. (Optional) Set `GEMINI_IMAGE_MODEL` to switch models (default is `gemini-2.5-flash-image`, a.k.a. "Nano Banana")
+4. Run the app:
    `npm run dev`

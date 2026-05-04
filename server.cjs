@@ -57,6 +57,7 @@ app.post('/api/caricature', async (req, res) => {
   if (!base64Image) return res.status(400).json({ error: 'Missing base64Image' });
 
   const apiKey = process.env.GEMINI_API_KEY;
+  const imageModel = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image'; // "Nano Banana"
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured on server' });
 
   const CREATURES = [
@@ -78,7 +79,7 @@ app.post('/api/caricature', async (req, res) => {
     const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: imageModel,
       contents: {
         parts: [
           { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
@@ -105,7 +106,7 @@ Style rules — follow these strictly:
         return res.json({ imageData: `data:image/png;base64,${part.inlineData.data}`, creature: creature.name });
       }
     }
-    throw new Error('No image returned by Gemini');
+    throw new Error(`No image returned by model: ${imageModel}`);
   } catch (err) {
     console.error('[caricature error]', err.message);
     res.status(500).json({ error: err.message });
