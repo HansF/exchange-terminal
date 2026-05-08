@@ -97,11 +97,46 @@ The XP-80T has physical DIP switches on the underside of the chassis for hardwar
 
 ## Printing images
 
-Images are automatically resized to 384px wide and converted to 1-bit black & white before sending. The `bitImageRaster` ESC/POS mode is used for reliable buffer handling.
+Images are automatically resized to 576px wide and converted to 1-bit black & white before sending. The `bitImageRaster` ESC/POS mode is used for reliable buffer handling.
 
 ```bash
 python xp80t.py image myfile.png
 ```
+
+## Cut alignment & feed timing
+
+The cutter blade sits **~18 mm above the print head**. After printing, you must feed paper past the blade before cutting, or the cut lands inside your content.
+
+**Calibrated value:** `3` newlines of feed before `p.cut()` produces an 18 mm gap from the last printed line to the cut — exactly enough to clear the bottom of a typical receipt without leaving extra blank paper.
+
+```python
+p.image(img, impl="bitImageRaster")
+p.text("\n" * 3)   # ~18 mm — clears the cutter blade
+time.sleep(0.5)    # see "Race conditions" below
+p.cut()
+```
+
+Each newline at the printer's default line height advances the paper roughly **5 mm**. So:
+
+| Newlines | Approx. gap |
+|---|---|
+| 3 | 18 mm ← correct |
+| 5 | 28 mm |
+| 7 | 38 mm |
+
+If a future content layout changes the visual cut position, adjust `cmd_image` in `xp80t.py` — don't pad your source images.
+
+### Race conditions on cut
+
+`p.image()` queues a large block of raster data; `p.cut()` is just a few bytes. Both are written to `/dev/usb/lp0` and processed by the printer in order, but the kernel/USB pipeline can briefly hold the cut command in a position where the printer interprets it before the entire image has physically rolled past the head.
+
+Symptoms:
+- Cut line appears **inside** the printed image (e.g. above a footer that should have been above the cut)
+- Footer reappears as the first content of the next ticket
+
+The fix in `cmd_image` is the explicit `time.sleep(0.5)` between `p.text("\n" * 3)` and `p.cut()`. This gives the printer time to drain its raster buffer before processing the cut command. Removing the sleep brings the bug back.
+
+If you ever see cuts landing inside content again, the first thing to try is a longer sleep (e.g. `1.0`) — not more newlines.
 
 ## Using as a library
 

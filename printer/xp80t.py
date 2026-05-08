@@ -108,9 +108,12 @@ def cmd_image(args):
     img = img.convert("L").point(lambda x: 0 if x < 128 else 255, "1")
     p = printer()
     p.image(img, impl="bitImageRaster")
-    p.text("\n\n\n")
-    time.sleep(0.5)
-    p.cut()
+    if not getattr(args, 'no_cut', False):
+        p.text("\n" * 3)  # feed past the cutter blade before cutting
+        time.sleep(0.5)
+        p.cut()
+    else:
+        p.text("\n\n\n")  # small gap between tickets
     print(f"Printed {args.file}.")
 
 
@@ -159,6 +162,7 @@ def main():
     # image
     p_img = sub.add_parser("image", help="Print an image file (auto B&W convert)")
     p_img.add_argument("file", help="Path to image file")
+    p_img.add_argument("--no-cut", action="store_true", dest="no_cut", help="Skip paper cut after printing")
     p_img.set_defaults(func=cmd_image)
 
     args = ap.parse_args()
