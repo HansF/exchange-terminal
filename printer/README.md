@@ -97,7 +97,9 @@ The XP-80T has physical DIP switches on the underside of the chassis for hardwar
 
 ## Printing images
 
-Images are automatically resized to 576px wide and converted to 1-bit black & white before sending. The `bitImageRaster` ESC/POS mode is used for reliable buffer handling.
+Images are automatically resized to 576px wide and converted to 1-bit black & white before sending. The `bitImageRaster` ESC/POS mode is used for reliable buffer handling — the whole bitmap goes out in a single `GS v 0` raster command.
+
+In-app templated tickets (Fortune, Todo, ExchangeTerminal) are pre-rendered at exactly **570 px** wide via `src/lib/print.ts` so the server passes the bitmap straight through without resampling. Anything ≤ 576 px wide takes the fast path; wider images (StencilCam caricatures, ThresholdFilter uploads) still get the LANCZOS resize fallback.
 
 ```bash
 python xp80t.py image myfile.png
@@ -142,6 +144,8 @@ A short `time.sleep(0.5)` between `p.text("\n" * 3)` and `p.cut(feed=False)` is 
 - Avoid `font-bold` / `font-black` — normal weights render as cleaner thin strokes.
 - Avoid solid-black fills (`bg-black text-white` boxes). Use plain text with em-dashes or a thin border instead.
 - A handful of text lines on a 80 mm × ~80 mm receipt is fine; large block fills are not.
+
+All in-app templates (`src/pages/Fortune.tsx`, `src/pages/ExchangeTerminal.tsx`, `src/pages/Todo.tsx` ticket subcomponents) are kept light. New templates added by callers must follow the same rules. User-supplied images (StencilCam caricatures, ThresholdFilter uploads) are not bounded by this codebase — if those start triggering the lock, add a density guard in `cmd_image` instead.
 
 ## Using as a library
 

@@ -1,6 +1,7 @@
 import { Printer, Download, Receipt, Code, Sparkles, Skull, Terminal, ArrowLeft } from 'lucide-react';
 import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
+import { printTicket } from '../lib/print';
 
 type Theme = 'standard' | 'magic' | 'punk' | 'system';
 type TicketType = 'both' | 'offer' | 'demand';
@@ -13,11 +14,11 @@ const THEMES = {
     header: 'EXCHANGE',
     sub: '*** TICKET ***',
     wrapperClass: 'border-0',
-    titleClass: 'border-b-[2px] border-black uppercase text-xl font-bold pb-2',
+    titleClass: 'border-b border-black uppercase text-xl font-bold pb-2',
     subClass: 'text-xs font-bold mt-2',
     dividerClass: 'border-b border-black border-dashed pb-1 mb-2',
     textClass: 'text-sm font-medium',
-    footerClass: 'border-t-[2px] border-black pt-4'
+    footerClass: 'border-t border-black pt-4'
   },
   magic: {
     id: 'magic',
@@ -25,25 +26,25 @@ const THEMES = {
     icon: Sparkles,
     header: '✧ THE ORACLE ✧',
     sub: 'READINGS & WISHES',
-    wrapperClass: 'border-[4px] border-double border-black p-2 bg-white',
-    titleClass: 'border-b-[1px] border-black uppercase text-xl font-bold pb-2',
+    wrapperClass: 'border border-double border-black p-2 bg-white',
+    titleClass: 'border-b border-black uppercase text-xl font-bold pb-2',
     subClass: 'text-xs font-bold mt-2',
-    dividerClass: 'border-b-[2px] border-black border-dotted pb-1 mb-2',
+    dividerClass: 'border-b border-black border-dotted pb-1 mb-2',
     textClass: 'text-sm italic font-bold',
-    footerClass: 'border-t-[2px] border-dotted border-black pt-4'
+    footerClass: 'border-t border-dotted border-black pt-4'
   },
   punk: {
     id: 'punk',
     name: 'DIY Punk',
     icon: Skull,
     header: 'X/ MUTUAL AID /X',
-    sub: 'NO COPS NO MASTERS',
+    sub: '═══ NO COPS NO MASTERS ═══',
     wrapperClass: 'border-0 bg-white',
-    titleClass: 'border-y-[6px] py-1 border-black uppercase text-2xl font-black tracking-tighter',
-    subClass: 'text-[10px] font-black mt-1 bg-black text-white py-1 block w-full',
-    dividerClass: 'border-b-[4px] border-black pb-1 mb-2',
-    textClass: 'text-base font-black uppercase leading-tight tracking-tight',
-    footerClass: 'border-t-[8px] border-black pt-4'
+    titleClass: 'border-y-[2px] py-1 border-black uppercase text-2xl font-black tracking-tighter',
+    subClass: 'text-[10px] font-black mt-1 block w-full text-center',
+    dividerClass: 'border-b-[2px] border-black pb-1 mb-2',
+    textClass: 'text-base font-bold uppercase leading-tight tracking-tight',
+    footerClass: 'border-t-[2px] border-black pt-4'
   },
   system: {
     id: 'system',
@@ -51,12 +52,12 @@ const THEMES = {
     icon: Terminal,
     header: '[ REC.TRANSFER ]',
     sub: 'OP_CODE: 0x9A',
-    wrapperClass: 'border-[2px] border-black bg-white',
-    titleClass: 'border-b-[1px] border-black uppercase text-lg font-bold pb-2',
+    wrapperClass: 'border border-black bg-white',
+    titleClass: 'border-b border-black uppercase text-lg font-bold pb-2',
     subClass: 'text-xs mt-2',
-    dividerClass: 'border-b-[1px] border-black pb-1 mb-2',
+    dividerClass: 'border-b border-black pb-1 mb-2',
     textClass: 'text-xs font-bold uppercase',
-    footerClass: 'border-t-[1px] border-black pt-4'
+    footerClass: 'border-t border-black pt-4'
   }
 };
 
@@ -97,15 +98,9 @@ export default function ExchangeTerminal({ onBack }: Props) {
     setPrintStatus('loading');
     setPrintError('');
     try {
-      const canvas = await captureTicketCanvas();
-      if (!canvas) return;
-      const response = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: canvas.toDataURL('image/png') }),
-      });
-      const result = await response.json();
-      if (!response.ok || result.error) throw new Error(result.error || 'Unknown error');
+      const element = document.getElementById('ticket-container');
+      if (!element) throw new Error('Ticket element not found');
+      await printTicket(element);
       setPrintStatus('success');
       setTimeout(() => setPrintStatus('idle'), 3000);
     } catch (err) {
@@ -373,7 +368,7 @@ export default function ExchangeTerminal({ onBack }: Props) {
               )}
 
               <div className={`text-center ${activeTheme.footerClass}`}>
-                <div className="text-[11px] mb-2 font-bold truncate">
+                <div className="text-[11px] mb-2 font-bold leading-tight">
                   {new Date().toLocaleString('en-US', {
                     year: 'numeric',
                     month: '2-digit',
@@ -382,8 +377,8 @@ export default function ExchangeTerminal({ onBack }: Props) {
                     minute: '2-digit',
                   })}
                 </div>
-                <div className="text-[12px] uppercase font-black tracking-widest bg-black text-white px-2 py-1 inline-block">
-                  {ticketType === 'both' ? 'MUTUAL AID' : (ticketType === 'offer' ? 'GIFT' : 'REQUEST')}
+                <div className="text-[12px] uppercase font-bold tracking-widest">
+                  — {ticketType === 'both' ? 'MUTUAL AID' : (ticketType === 'offer' ? 'GIFT' : 'REQUEST')} —
                 </div>
               </div>
             </div>

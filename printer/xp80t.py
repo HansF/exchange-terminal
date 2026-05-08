@@ -102,19 +102,25 @@ def cmd_test(args):
 def cmd_image(args):
     from PIL import Image as PILImage
     PRINT_WIDTH = 576
+    BOTTOM_PAD_ROWS = 24  # white pad protects against printer dropping last rows
     img = PILImage.open(args.file).convert("RGB")
-    ratio = PRINT_WIDTH / img.width
-    img = img.resize((PRINT_WIDTH, int(img.height * ratio)), PILImage.LANCZOS)
-    img = img.convert("L").point(lambda x: 0 if x < 128 else 255, "1")
+    if img.width <= PRINT_WIDTH:
+        img = img.convert("L").point(lambda x: 0 if x < 128 else 255, "1")
+    else:
+        ratio = PRINT_WIDTH / img.width
+        img = img.resize((PRINT_WIDTH, int(img.height * ratio)), PILImage.LANCZOS)
+        img = img.convert("L").point(lambda x: 0 if x < 128 else 255, "1")
+    padded = PILImage.new("1", (img.width, img.height + BOTTOM_PAD_ROWS), 1)
+    padded.paste(img, (0, 0))
     p = printer()
-    p.image(img, impl="bitImageRaster")
+    p.image(padded, impl="bitImageRaster")
     if not getattr(args, 'no_cut', False):
-        p.text("\n" * 3)
+        p.text("\n" * 4)
         time.sleep(0.5)
         p.cut(feed=False)
     else:
         p.text("\n\n")
-    print(f"Printed {args.file}.")
+    print(f"Printed {args.file} ({padded.width}x{padded.height}).")
 
 
 def main():

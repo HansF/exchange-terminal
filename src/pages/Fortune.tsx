@@ -1,6 +1,6 @@
 import { ArrowLeft, Printer, Sparkles } from 'lucide-react';
 import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import { printTicket } from '../lib/print';
 import { FORTUNES } from '../fortunes';
 
 interface Props {
@@ -28,26 +28,7 @@ export default function Fortune({ onBack }: Props) {
       const el = ticketRef.current;
       if (!el) throw new Error('Ticket element not found');
 
-      const canvas = await html2canvas(el, { scale: 4, backgroundColor: '#FFFFFF', logging: false });
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-          const val = brightness > 128 ? 255 : 0;
-          data[i] = val; data[i + 1] = val; data[i + 2] = val;
-        }
-        ctx.putImageData(imageData, 0, 0);
-      }
-
-      const response = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: canvas.toDataURL('image/png') }),
-      });
-      const result = await response.json();
-      if (!response.ok || result.error) throw new Error(result.error || 'Unknown error');
+      await printTicket(el);
 
       setStatus('success');
       setTimeout(() => setStatus('idle'), 3000);
@@ -114,26 +95,26 @@ export default function Fortune({ onBack }: Props) {
         >
           {/* Header */}
           <div className="text-center border-b border-black pb-3 mb-5">
-            <div className="text-[10px] tracking-[0.3em] uppercase mb-1">✦ ✦ ✦</div>
-            <div className="text-2xl uppercase tracking-tight">THE ORACLE</div>
-            <div className="text-[10px] tracking-widest mt-1">YOUR FORTUNE AWAITS</div>
+            <div className="text-[10px] font-bold tracking-[0.3em] uppercase mb-1">✦ ✦ ✦</div>
+            <div className="text-2xl font-bold uppercase tracking-tight">THE ORACLE</div>
+            <div className="text-[10px] font-bold tracking-widest mt-1">YOUR FORTUNE AWAITS</div>
           </div>
 
           {/* Fortune text */}
           <div className="mb-6 py-2">
-            <div className="text-[10px] uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
-            <p className="text-base leading-snug italic">{fortune}</p>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
+            <p className="text-base font-bold leading-snug italic">{fortune}</p>
           </div>
 
           {/* Decorative divider */}
-          <div className="text-center text-sm my-4 tracking-widest">
+          <div className="text-center text-sm font-bold my-4 tracking-widest">
             — ✦ —
           </div>
 
           {/* Footer */}
           <div className="border-t border-black pt-3 text-center">
-            <div className="text-[10px] mb-2">{now}</div>
-            <div className="text-[11px] tracking-widest uppercase">— Oracle Dispatch —</div>
+            <div className="text-[10px] font-bold mb-2">{now}</div>
+            <div className="text-[11px] font-bold tracking-widest uppercase">— Oracle Dispatch —</div>
           </div>
         </div>
       </div>

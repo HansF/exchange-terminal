@@ -1,6 +1,6 @@
 import { ArrowLeft, Pause, Play, StopCircle, RefreshCw } from 'lucide-react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import html2canvas from 'html2canvas';
+import { printTicket } from '../lib/print';
 
 interface Props {
   onBack: () => void;
@@ -157,7 +157,7 @@ const ticketBase: React.CSSProperties = {
 
 const T = {
   row: { display: 'flex', justifyContent: 'space-between' } as React.CSSProperties,
-  bold: { fontWeight: 900 } as React.CSSProperties,
+  bold: { fontWeight: 800 } as React.CSSProperties,
   sm: { fontSize: 11 } as React.CSSProperties,
   xs: { fontSize: 10 } as React.CSSProperties,
   muted: { color: '#555555' } as React.CSSProperties,
@@ -237,30 +237,8 @@ export default function Todo({ onBack }: Props) {
   const capture = async (ref: React.RefObject<HTMLDivElement | null>, cut: boolean): Promise<string | null> => {
     const el = ref.current;
     if (!el) { console.error('[capture] ref is null'); return 'element not found'; }
-    console.log('[capture] el dimensions:', el.offsetWidth, 'x', el.offsetHeight, 'cut:', cut);
     try {
-      const canvas = await html2canvas(el, { scale: 4, backgroundColor: '#FFFFFF', logging: false });
-      console.log('[capture] canvas:', canvas.width, 'x', canvas.height);
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        for (let i = 0; i < img.data.length; i += 4) {
-          const b = 0.299 * img.data[i] + 0.587 * img.data[i+1] + 0.114 * img.data[i+2];
-          const v = b > 128 ? 255 : 0;
-          img.data[i] = v; img.data[i+1] = v; img.data[i+2] = v;
-        }
-        ctx.putImageData(img, 0, 0);
-      }
-      const imageData = canvas.toDataURL('image/png');
-      console.log('[capture] imageData length:', imageData.length, 'sending to /api/print');
-      const res = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData, cut }),
-      });
-      const json = await res.json();
-      console.log('[capture] print response:', res.status, json);
-      if (!res.ok || json.error) return json.error || `HTTP ${res.status}`;
+      await printTicket(el, { cut });
       return null;
     } catch (e) {
       console.error('[capture] error:', e);
@@ -784,7 +762,7 @@ function DayHeader({ day }: { day: DayState | null }) {
       <div style={{ ...T.center, ...T.xs, ...T.bold, letterSpacing: '0.3em', marginBottom: 6 }}>✦ ✦ ✦</div>
       <div style={{ ...T.center, fontSize: 16, ...T.bold, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>FOCUS TERMINAL</div>
       <div style={{ ...T.center, ...T.sm, ...T.muted, marginBottom: 6 }}>{date}</div>
-      <div style={{ borderTop: '2px solid #000', paddingTop: 8, ...T.center }}>
+      <div style={{ borderTop: '1px solid #000', paddingTop: 8, ...T.center }}>
         <div style={{ ...T.xs, ...T.bold, textTransform: 'uppercase', letterSpacing: '0.2em' }}>Day started at {time}</div>
       </div>
     </div>
@@ -814,7 +792,7 @@ function EodSummary({ sessions }: { sessions: Session[] }) {
 
   return (
     <>
-      <div style={{ borderTop: '3px solid #000', paddingTop: 12, marginTop: 4 }}>
+      <div style={{ borderTop: '1px solid #000', paddingTop: 12, marginTop: 4 }}>
         <div style={{ ...T.center, ...T.bold, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
           — End of Day —
         </div>
@@ -822,11 +800,11 @@ function EodSummary({ sessions }: { sessions: Session[] }) {
 
         <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', borderTop: '1px solid #000', borderBottom: '1px solid #000', padding: '8px 0', marginBottom: 12 }}>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900 }}>{sessions.length}</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{sessions.length}</div>
             <div style={{ ...T.xs, ...T.bold, textTransform: 'uppercase' }}>sessions</div>
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 900 }}>{totalMin}</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{totalMin}</div>
             <div style={{ ...T.xs, ...T.bold, textTransform: 'uppercase' }}>minutes</div>
           </div>
         </div>
@@ -843,8 +821,8 @@ function EodSummary({ sessions }: { sessions: Session[] }) {
           </div>
         ))}
 
-        <div style={{ borderTop: '2px solid #000', paddingTop: 10, ...T.center, marginTop: 8 }}>
-          <div style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.5 }}>
+        <div style={{ borderTop: '1px solid #000', paddingTop: 10, ...T.center, marginTop: 8 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.5 }}>
             You showed up today.
           </div>
           <div style={{ ...T.sm, ...T.muted, marginTop: 2 }}>That's the whole game.</div>
