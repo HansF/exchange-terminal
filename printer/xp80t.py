@@ -109,11 +109,11 @@ def cmd_image(args):
     p = printer()
     p.image(img, impl="bitImageRaster")
     if not getattr(args, 'no_cut', False):
-        p.text("\n" * 3)  # feed past the cutter blade before cutting
+        p.text("\n" * 3)
         time.sleep(0.5)
-        p.cut()
+        p.cut(feed=False)
     else:
-        p.text("\n\n\n")  # small gap between tickets
+        p.text("\n\n")
     print(f"Printed {args.file}.")
 
 

@@ -126,17 +126,22 @@ Each newline at the printer's default line height advances the paper roughly **5
 
 If a future content layout changes the visual cut position, adjust `cmd_image` in `xp80t.py` — don't pad your source images.
 
-### Race conditions on cut
+### Cut races on dense raster images
 
-`p.image()` queues a large block of raster data; `p.cut()` is just a few bytes. Both are written to `/dev/usb/lp0` and processed by the printer in order, but the kernel/USB pipeline can briefly hold the cut command in a position where the printer interprets it before the entire image has physically rolled past the head.
+`p.image()` queues a large block of raster data; `p.cut()` is just a few bytes. The printer appears to process the cut command somewhat ahead of pending raster data — symptoms include the cut landing **inside** the image (e.g. above a footer that should be above the cut), with the dropped content reappearing on the next ticket.
 
-Symptoms:
-- Cut line appears **inside** the printed image (e.g. above a footer that should have been above the cut)
-- Footer reappears as the first content of the next ticket
+The dominant factor is **how dense the image is**, not how tall:
 
-The fix in `cmd_image` is the explicit `time.sleep(0.5)` between `p.text("\n" * 3)` and `p.cut()`. This gives the printer time to drain its raster buffer before processing the cut command. Removing the sleep brings the bug back.
+- A sparse 576×648 image (mostly white with a few text lines) prints fully and cuts cleanly.
+- A dense 576×648 image with thick borders, bold/black font weights, and solid black fills (e.g. a bar with white text on black background) overloads the print head — the printer gets stuck in a busy state with the feed button locked, and the cut lands well above the bottom of the content.
 
-If you ever see cuts landing inside content again, the first thing to try is a longer sleep (e.g. `1.0`) — not more newlines.
+A short `time.sleep(0.5)` between `p.text("\n" * 3)` and `p.cut(feed=False)` is enough for normal content. Longer sleeps **do not** help with dense images — the printer is not actively printing during the wait, it is stuck.
+
+**Fix at the source**: keep ticket designs light.
+- Use 1-px borders (`border-b`, not `border-b-[3px]`).
+- Avoid `font-bold` / `font-black` — normal weights render as cleaner thin strokes.
+- Avoid solid-black fills (`bg-black text-white` boxes). Use plain text with em-dashes or a thin border instead.
+- A handful of text lines on a 80 mm × ~80 mm receipt is fine; large block fills are not.
 
 ## Using as a library
 

@@ -102,7 +102,10 @@ export default function Fortune({ onBack }: Props) {
         )}
       </div>
 
-      {/* Hidden fortune ticket — rendered off-screen for html2canvas capture */}
+      {/* Hidden fortune ticket — rendered off-screen for html2canvas capture.
+          Kept light (thin borders, no solid black fills, normal weights) so
+          the thermal head doesn't overload on dense raster — see
+          printer/README.md "Cut alignment & feed timing". */}
       <div className="fixed top-0 left-[-9999px] pointer-events-none" aria-hidden="true">
         <div
           ref={ticketRef}
@@ -110,29 +113,27 @@ export default function Fortune({ onBack }: Props) {
           style={{ fontSmoothing: 'none', WebkitFontSmoothing: 'none' } as React.CSSProperties}
         >
           {/* Header */}
-          <div className="text-center border-b-[3px] border-black pb-3 mb-5">
-            <div className="text-[10px] font-bold tracking-[0.3em] uppercase mb-1">✦ ✦ ✦</div>
-            <div className="text-2xl font-black uppercase tracking-tight">THE ORACLE</div>
-            <div className="text-[10px] font-bold tracking-widest mt-1">YOUR FORTUNE AWAITS</div>
+          <div className="text-center border-b border-black pb-3 mb-5">
+            <div className="text-[10px] tracking-[0.3em] uppercase mb-1">✦ ✦ ✦</div>
+            <div className="text-2xl uppercase tracking-tight">THE ORACLE</div>
+            <div className="text-[10px] tracking-widest mt-1">YOUR FORTUNE AWAITS</div>
           </div>
 
           {/* Fortune text */}
           <div className="mb-6 py-2">
-            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
-            <p className="text-base font-bold leading-snug italic">{fortune}</p>
+            <div className="text-[10px] uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
+            <p className="text-base leading-snug italic">{fortune}</p>
           </div>
 
           {/* Decorative divider */}
-          <div className="text-center text-sm font-bold my-4 tracking-widest">
+          <div className="text-center text-sm my-4 tracking-widest">
             — ✦ —
           </div>
 
           {/* Footer */}
-          <div className="border-t-[2px] border-black pt-3 text-center">
-            <div className="text-[10px] font-bold mb-2">{now}</div>
-            <div className="text-[11px] font-black tracking-widest bg-black text-white px-2 py-1 inline-block">
-              ORACLE DISPATCH
-            </div>
+          <div className="border-t border-black pt-3 text-center">
+            <div className="text-[10px] mb-2">{now}</div>
+            <div className="text-[11px] tracking-widest uppercase">— Oracle Dispatch —</div>
           </div>
         </div>
       </div>
