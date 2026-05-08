@@ -3,11 +3,21 @@
 require('dotenv').config();
 
 const express = require('express');
-const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const Database = require('better-sqlite3');
+
+const PRINT_SERVICE_URL = process.env.PRINT_SERVICE_URL || 'http://localhost:8080';
+const PRINT_SERVICE_KEY = process.env.PRINT_SERVICE_KEY || '';
+
+async function printdFetch(pathname, init = {}) {
+  const headers = { ...(init.headers || {}) };
+  if (PRINT_SERVICE_KEY) headers['Authorization'] = `Bearer ${PRINT_SERVICE_KEY}`;
+  const r = await fetch(`${PRINT_SERVICE_URL}${pathname}`, { ...init, headers });
+  const text = await r.text();
+  let body; try { body = JSON.parse(text); } catch { body = { error: text }; }
+  return { ok: r.ok, status: r.status, body };
+}
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
@@ -107,53 +117,48 @@ app.post('/api/day/reset', (_req, res) => {
   res.json({ ok: true });
 });
 
-// ── Cut route ─────────────────────────────────────────────────────────────────
+// ── Print routes ─────────────────────────────────────────────────────────────
+// These proxy to the printd service (https://github.com/HansF/printd) configured
+// via PRINT_SERVICE_URL / PRINT_SERVICE_KEY in .env. Frontends keep talking to
+// /api/print so the static build is unchanged.
 
-app.post('/api/cut', (_req, res) => {
-  const proc = require('child_process').spawn(PYTHON, [PRINTER_SCRIPT, 'cut'], { stdio: 'ignore' });
-  proc.on('close', code => code === 0 ? res.json({ ok: true }) : res.status(500).json({ error: `exit ${code}` }));
-  proc.on('error', err => res.status(500).json({ error: err.message }));
+app.post('/api/cut', async (_req, res) => {
+  try {
+    const r = await printdFetch('/cut', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ partial: false }),
+    });
+    if (!r.ok) return res.status(r.status).json(r.body);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[cut error]', err.message);
+    res.status(502).json({ error: `printd unreachable: ${err.message}` });
+  }
 });
-
-const PRINTER_SCRIPT = path.join(__dirname, 'printer', 'xp80t.py');
-const PYTHON = path.join(__dirname, 'printer', 'venv', 'bin', 'python3');
 
 app.post('/api/print', async (req, res) => {
   const { imageData, cut = true } = req.body;
   console.log(`[print] ${new Date().toISOString()} cut=${cut} bytes=${imageData?.length ?? 0}`);
 
-  if (!imageData || !imageData.startsWith('data:image/png;base64,')) {
+  if (!imageData || !imageData.startsWith('data:image/')) {
     return res.status(400).json({ error: 'Missing or invalid imageData field' });
   }
 
-  const base64 = imageData.replace('data:image/png;base64,', '');
-  const imgBuffer = Buffer.from(base64, 'base64');
-  const tmpFile = path.join('/tmp', `ticket-${crypto.randomUUID()}.png`);
-
   try {
-    fs.writeFileSync(tmpFile, imgBuffer);
-
-    const args = [PRINTER_SCRIPT, 'image', tmpFile];
-    if (!cut) args.push('--no-cut');
-
-    await new Promise((resolve, reject) => {
-      const proc = spawn(PYTHON, args, { stdio: ['ignore', 'inherit', 'pipe'] });
-      let stderr = '';
-      proc.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
-      proc.on('close', (code) => {
-        code === 0 ? resolve() : reject(new Error(stderr || `python3 exited with code ${code}`));
-      });
-      proc.on('error', (err) => reject(new Error(`Failed to start python3: ${err.message}`)));
+    const r = await printdFetch('/print', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageData, cut }),
     });
-
-    res.json({ success: true });
-
+    if (!r.ok) {
+      console.error('[print error]', r.status, r.body);
+      return res.status(r.status).json(r.body);
+    }
+    res.json({ success: true, ...r.body });
   } catch (err) {
     console.error('[print error]', err.message);
-    res.status(500).json({ error: err.message });
-
-  } finally {
-    try { fs.unlinkSync(tmpFile); } catch (_) {}
+    res.status(502).json({ error: `printd unreachable: ${err.message}` });
   }
 });
 
