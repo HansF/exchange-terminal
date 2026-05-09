@@ -181,21 +181,6 @@ app.post('/api/caricature', async (req, res) => {
   const imageModel = process.env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image'; // "Nano Banana"
   if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY not configured on server' });
 
-  const CREATURES = [
-    { name: 'goblin',    traits: 'pointy ears, wide grin full of uneven teeth, bulbous warty nose, mischievous squinting eyes, wild scraggly hair, small hunched posture' },
-    { name: 'fairy',     traits: 'delicate insect wings sprouting from back, slightly pointed ears, large luminous eyes, ethereal flowing hair, slender graceful features, tiny stature' },
-    { name: 'pixie',     traits: 'oversized pointed ears, enormous bright eyes taking up half the face, button nose, cheeky grin, wild spiky hair, small compact body' },
-    { name: 'leprechaun', traits: 'tall buckled hat, thick bushy beard or sideburns, rosy round cheeks, twinkling eyes, stout barrel-chested body, mischievous smirk' },
-    { name: 'dragon',    traits: 'small curved horns on forehead, slit reptilian pupils, faint scale texture on cheekbones, slightly elongated snout, sharp teeth visible in grin, proud fierce expression' },
-    { name: 'troll',     traits: 'enormous bulbous nose taking up a third of the face, tiny beady eyes, protruding underbite with tusks, massive boulder-like jaw, mossy tangled hair' },
-    { name: 'witch',     traits: 'long crooked hooked nose, sharp angular chin, deep-set piercing eyes under a tall pointed hat, wild flowing hair, knowing wry smile' },
-    { name: 'elf',       traits: 'long elegant pointed ears sweeping back, high sharp cheekbones, almond-shaped eyes with an otherworldly gaze, slender jawline, ageless serene expression' },
-    { name: 'gnome',     traits: 'enormous round pointy hat, extremely long white bushy beard, rosy bulbous cheeks, tiny twinkling eyes nearly hidden by eyebrows, short stout frame' },
-    { name: 'werewolf',  traits: 'slightly elongated snout, prominent brow ridge, faint fur texture along jawline and forehead, yellow eyes, sharp canine teeth, wild untamed hair' },
-  ];
-
-  const creature = CREATURES[Math.floor(Math.random() * CREATURES.length)];
-
   try {
     const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
@@ -205,29 +190,56 @@ app.post('/api/caricature', async (req, res) => {
         parts: [
           { inlineData: { data: base64Image, mimeType: 'image/jpeg' } },
           {
-            text: `Transform this person into a ${creature.name} in the illustration style of Fiep Westendorp.
-Keep the face loosely recognisable but reinterpret it as a ${creature.name} with these traits: ${creature.traits}.
+            text: `Draw a flattering, whimsical caricature of the person in the photo. Tight close-up of just the face — head only, no shoulders, no body, no background scene. Designed to print at the top of a paper receipt next to someone's name so people can put a face to the name.
+
+Keep the person's face clearly recognisable — same hairstyle, glasses, smile, beard, or other distinctive features. Gentle, complimentary exaggeration of one or two distinctive features. Stay warm — never mean. Do not emphasise weight, age, or wrinkles.
 
 Style rules — follow these strictly:
-- Fiep Westendorp's iconic Dutch children's book style (Jip en Janneke)
-- Thin, fluid, slightly wobbly hand-drawn lines — NOT thick or bold
-- Round simplified face with tiny dot or dash eyes, small button nose, simple curved mouth
-- Flat silhouette with minimal interior detail; clothing suggested by a few simple lines or tiny patterns (dots, stripes)
-- Playful, innocent, slightly naive quality — charming not scary
-- Pure black lines on a white background only — no gray, no shading, no gradients, no fills
-- Leave generous white space; do not fill areas with black
-- Suitable for thermal receipt printer output`,
+- Pure black ink on a pure white background. No gray, no shading, no gradients, no cross-hatching, no solid black fills, no halftones.
+- THICK, bold, confident hand-drawn lines — like a brush pen or fat marker. Lines must survive 1-bit thresholding on a thermal printer.
+- Tight close-up of the face, filling the frame. The head should reach near the top and bottom edges with only a small white margin.
+- Simple, expressive features: clear eyes, simple nose, clear mouth.
+- No clothing, no shoulders, no scenery, no decorative borders, no text. Just the face on white.
+- Output must be legible when printed on an 80 mm thermal receipt printer at roughly 570 pixels wide.
+
+Return only the image.`,
           },
         ],
       },
     });
 
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
+    const candidate = response.candidates?.[0];
+    for (const part of candidate?.content?.parts || []) {
       if (part.inlineData) {
-        return res.json({ imageData: `data:image/png;base64,${part.inlineData.data}`, creature: creature.name });
+        return res.json({ imageData: `data:image/png;base64,${part.inlineData.data}` });
       }
     }
-    throw new Error(`No image returned by model: ${imageModel}`);
+
+    // No image came back. Surface why — usually a safety block, a text-only
+    // response, or a finish-reason other than STOP.
+    const finishReason = candidate?.finishReason || 'UNKNOWN';
+    const promptFeedback = response.promptFeedback;
+    const textParts = (candidate?.content?.parts || [])
+      .map(p => p.text)
+      .filter(Boolean)
+      .join(' ')
+      .slice(0, 300);
+    const safety = candidate?.safetyRatings?.filter(r => r.blocked || r.probability === 'HIGH');
+
+    console.error('[caricature] no image returned', {
+      model: imageModel,
+      finishReason,
+      textParts: textParts || null,
+      safetyBlocks: safety,
+      promptFeedback,
+    });
+
+    let detail = `finishReason=${finishReason}`;
+    if (textParts) detail += `; model said: "${textParts}"`;
+    if (safety?.length) detail += `; safety: ${safety.map(s => s.category).join(', ')}`;
+    if (promptFeedback?.blockReason) detail += `; promptFeedback.blockReason=${promptFeedback.blockReason}`;
+
+    throw new Error(`Model ${imageModel} returned no image (${detail})`);
   } catch (err) {
     console.error('[caricature error]', err.message);
     res.status(500).json({ error: err.message });

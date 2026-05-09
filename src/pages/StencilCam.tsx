@@ -11,7 +11,6 @@ interface Props {
 export default function StencilCam({ onBack }: Props) {
   const [state, setState] = useState<AppState>('IDLE');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [creature, setCreature] = useState<string | null>(null);
 
   const handleCapture = useCallback(async (base64: string) => {
     setState('ANALYZING');
@@ -26,7 +25,6 @@ export default function StencilCam({ onBack }: Props) {
       const aiData = await aiRes.json();
       if (!aiRes.ok || aiData.error) throw new Error(aiData.error || 'AI generation failed');
 
-      setCreature(aiData.creature ?? null);
       setState('PRINTING');
 
       // 2. Apply binary threshold on an offscreen canvas
@@ -115,14 +113,12 @@ export default function StencilCam({ onBack }: Props) {
             </div>
             <div className="text-center px-8">
               <h2 className="text-3xl font-black uppercase tracking-tighter mb-2">
-                {state === 'ANALYZING' ? 'Summoning…' : 'Printing…'}
+                {state === 'ANALYZING' ? 'Drawing…' : 'Printing…'}
               </h2>
               <p className="font-bold uppercase tracking-widest text-gray-500 animate-pulse">
                 {state === 'ANALYZING'
-                  ? 'The AI is choosing your creature'
-                  : creature
-                    ? `You are a ${creature.toUpperCase()}`
-                    : 'Sending to thermal printer'}
+                  ? 'Sketching your portrait'
+                  : 'Sending to thermal printer'}
               </p>
             </div>
           </div>
@@ -133,7 +129,7 @@ export default function StencilCam({ onBack }: Props) {
             <div className="text-6xl">🖨️</div>
             <div className="text-center px-8">
               <h2 className="text-3xl font-black uppercase tracking-tighter mb-2">
-                {creature ? `You are a ${creature.toUpperCase()}!` : 'Printed!'}
+                Printed!
               </h2>
               <p className="font-bold uppercase tracking-widest text-gray-500">Check the printer.</p>
             </div>
