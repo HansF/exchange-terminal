@@ -234,4 +234,4 @@ Style rules — follow these strictly:
   }
 });
 
-app.listen(3001, () => console.log('Print server listening on http://localhost:3001'));
+app.listen(3001, () => console.log('Exchange Terminal API listening on http://localhost:3001'));
