@@ -1,4 +1,5 @@
 import html2canvas from 'html2canvas';
+import { printd } from './printd';
 
 export const PRINT_WIDTH_PX = 570;
 
@@ -14,6 +15,7 @@ function resizeCanvasExact(src: HTMLCanvasElement, targetWidth: number): HTMLCan
   return out;
 }
 
+/** Render a DOM element to a 570 px wide, 1-bit-thresholded PNG data URL. */
 export async function captureTicketPng(el: HTMLElement): Promise<string> {
   const cssWidth = el.offsetWidth;
   const scale = PRINT_WIDTH_PX / cssWidth;
@@ -33,13 +35,11 @@ export async function captureTicketPng(el: HTMLElement): Promise<string> {
   return out.toDataURL('image/png');
 }
 
+/** Capture and print a ticket element. Throws on transport or printer error. */
 export async function printTicket(el: HTMLElement, opts: { cut?: boolean } = {}): Promise<void> {
   const imageData = await captureTicketPng(el);
-  const res = await fetch('/api/print', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imageData, cut: opts.cut ?? true }),
-  });
-  const json = await res.json();
-  if (!res.ok || json.error) throw new Error(json.error || `HTTP ${res.status}`);
+  await printd.print(imageData, { cut: opts.cut ?? true });
 }
+
+// Re-export the full client so pages can reach feed/cut/status without importing two files.
+export { printd } from './printd';

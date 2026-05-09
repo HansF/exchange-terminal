@@ -54,13 +54,8 @@ export default function StencilCam({ onBack }: Props) {
       });
 
       // 3. Send to printer
-      const printRes = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData }),
-      });
-      const printData = await printRes.json();
-      if (!printRes.ok || printData.error) throw new Error(printData.error || 'Print failed');
+      const { printd } = await import('../lib/printd');
+      await printd.print(imageData);
 
       setState('SUCCESS');
     } catch (err) {

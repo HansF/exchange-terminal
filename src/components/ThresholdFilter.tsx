@@ -53,13 +53,8 @@ export const ThresholdFilter: React.FC<ThresholdFilterProps> = ({ imageSrc, onRe
     setPrintStatus('loading');
     setPrintError('');
     try {
-      const response = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageData: outputUrl }),
-      });
-      const result = await response.json();
-      if (!response.ok || result.error) throw new Error(result.error || 'Unknown error');
+      const { printd } = await import('../lib/printd');
+      await printd.print(outputUrl);
       setPrintStatus('success');
       setTimeout(() => setPrintStatus('idle'), 3000);
     } catch (err) {

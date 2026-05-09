@@ -117,28 +117,39 @@ app.post('/api/day/reset', (_req, res) => {
   res.json({ ok: true });
 });
 
-// ── Print routes ─────────────────────────────────────────────────────────────
-// These proxy to the printd service (https://github.com/HansF/printd) configured
-// via PRINT_SERVICE_URL / PRINT_SERVICE_KEY in .env. Frontends keep talking to
-// /api/print so the static build is unchanged.
+// ── printd proxy ─────────────────────────────────────────────────────────────
+// Same-origin shim over the printd service (https://github.com/HansF/printd).
+// The bearer key (PRINT_SERVICE_KEY) lives only here, never in the browser.
+// Routes mirror the printd API surface so src/lib/printd.ts can import the
+// same paths verbatim. /api/print keeps the legacy { imageData } body shape
+// because old static builds may still be in users' caches.
 
-app.post('/api/cut', async (_req, res) => {
-  try {
-    const r = await printdFetch('/cut', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ partial: false }),
-    });
-    if (!r.ok) return res.status(r.status).json(r.body);
-    res.json({ ok: true });
-  } catch (err) {
-    console.error('[cut error]', err.message);
-    res.status(502).json({ error: `printd unreachable: ${err.message}` });
-  }
-});
+function relayJson(method, path, transformBody) {
+  const hasBody = method !== 'GET' && method !== 'HEAD';
+  return async (req, res) => {
+    try {
+      const init = { method };
+      if (hasBody) {
+        const body = transformBody ? transformBody(req.body || {}) : (req.body ?? {});
+        init.headers = { 'Content-Type': 'application/json' };
+        init.body = JSON.stringify(body);
+      }
+      const r = await printdFetch(path, init);
+      res.status(r.status).json(r.body);
+    } catch (err) {
+      console.error(`[printd ${path}]`, err.message);
+      res.status(502).json({ error: `printd unreachable: ${err.message}` });
+    }
+  };
+}
+
+app.get('/api/healthz', relayJson('GET', '/healthz'));
+app.get('/api/status', relayJson('GET', '/status'));
+app.post('/api/feed', relayJson('POST', '/feed', b => ({ lines: b.lines ?? 3 })));
+app.post('/api/cut', relayJson('POST', '/cut', b => ({ partial: !!b.partial })));
 
 app.post('/api/print', async (req, res) => {
-  const { imageData, cut = true } = req.body;
+  const { imageData, cut = true } = req.body || {};
   console.log(`[print] ${new Date().toISOString()} cut=${cut} bytes=${imageData?.length ?? 0}`);
 
   if (!imageData || !imageData.startsWith('data:image/')) {
