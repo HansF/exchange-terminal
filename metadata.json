@@ -1,6 +1,8 @@
 {
-  "name": "POS Exchange Tickets",
-  "description": "Create printable black-and-white receipts for offerings and demands at events.",
-  "requestFramePermissions": [],
+  "name": "Exchange Terminal",
+  "description": "Paper-receipt apps for exchange tickets, fortunes, focus sessions, AI caricatures, and image stencils.",
+  "requestFramePermissions": [
+    "camera"
+  ],
   "majorCapabilities": []
 }

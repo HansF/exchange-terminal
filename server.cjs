@@ -31,9 +31,6 @@ const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
 
 db.exec(`
-  DROP TABLE IF EXISTS todos;
-  DROP TABLE IF EXISTS sessions;
-  DROP TABLE IF EXISTS day_log;
   CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY,
     started_at INTEGER NOT NULL,

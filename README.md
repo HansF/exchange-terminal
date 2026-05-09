@@ -4,7 +4,7 @@
 > Tickets for offerings & demands, fortunes from an oracle, focus-session timers, AI caricatures, and image stencils — all rendered in the browser, all delivered as crisp 1-bit receipts.
 
 ![React](https://img.shields.io/badge/React-19-149eca)
-![Vite](https://img.shields.io/badge/Vite-7-646cff)
+![Vite](https://img.shields.io/badge/Vite-6-646cff)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
@@ -21,10 +21,10 @@ Five apps under one launcher (`src/pages/Home.tsx`):
 | **Exchange Terminal** | Generates printable offering / demand / mutual-aid tickets in four visual themes (Standard, Mystical, DIY Punk, Terminal). |
 | **Fortune** | An "oracle" — draws a random prophecy and prints it as a receipt. |
 | **Todo** | A focus-session timer with paper artefacts: prints a daily header at start, a session summary on each completion, and an end-of-day recap. |
-| **StencilCam** | Snaps a photo, runs it through Gemini ("Nano Banana") with a Fiep-Westendorp creature prompt, prints the result. |
-| **ThresholdFilter** | Upload an image, dial in a threshold, print as a 1-bit stencil. |
+| **StencilCam** | Snaps a photo, asks Gemini for a flattering black-and-white caricature, thresholds it, and prints the result. |
+| **Threshold Stencil** | Upload an image, dial in a threshold, export or print it as a 1-bit stencil. |
 
-Every "Print" button captures the on-screen ticket via `html2canvas` at exactly **570 px** wide, thresholds it to 1-bit on the client, and ships the PNG to printd through a small typed wrapper in [`src/lib/printd.ts`](src/lib/printd.ts).
+Templated receipt views use [`src/lib/print.ts`](src/lib/print.ts) to capture DOM with `html2canvas` at exactly **570 px** wide, threshold to 1-bit on the client, and send the PNG through the typed printd wrapper in [`src/lib/printd.ts`](src/lib/printd.ts). StencilCam and Threshold Stencil generate their own thresholded PNGs and use the same print client.
 
 ---
 
@@ -42,7 +42,7 @@ Every "Print" button captures the on-screen ticket via `html2canvas` at exactly 
 ```
 
 `server.cjs` does three things:
-1. **Storage** for the Todo app — a tiny `data/todo.db` (sqlite) holding sessions and day logs.
+1. **Storage** for the Todo app — a tiny persistent `data/todo.db` (sqlite) holding sessions and day logs.
 2. **Gemini proxy** for StencilCam — keeps the API key server-side.
 3. **printd proxy** — relays `/api/print`, `/api/cut`, `/api/feed`, `/api/status`, `/api/healthz` to the printd service so the bearer token never reaches the browser.
 
@@ -69,6 +69,8 @@ npm run dev:full       # vite + express, side by side
 ```
 
 Then open http://localhost:3000.
+
+The Express API listens on http://localhost:3001. Vite proxies `/api/*` to it during development.
 
 ### Environment variables
 
@@ -135,6 +137,8 @@ Image-pipeline trade-offs (template lightening, dropped-row mitigation) are docu
 ## Deployment
 
 Run the Express API behind a reverse proxy (Caddy/nginx) and serve the Vite build as a static site. printd should run on the same machine (or the same LAN) as the printer; everything else can live anywhere.
+
+Keep `data/todo.db` on persistent storage if you want Todo history to survive restarts or deployments. The database is created automatically on first server start.
 
 For Raspberry Pi / kiosk setups, see printd's [`docs/deployment.md`](https://github.com/HansF/printd/blob/main/docs/deployment.md).
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, RefreshCw, Printer } from 'lucide-react';
+import { printd } from '../lib/printd';
 
 interface ThresholdFilterProps {
   imageSrc: string;
@@ -53,7 +54,6 @@ export const ThresholdFilter: React.FC<ThresholdFilterProps> = ({ imageSrc, onRe
     setPrintStatus('loading');
     setPrintError('');
     try {
-      const { printd } = await import('../lib/printd');
       await printd.print(outputUrl);
       setPrintStatus('success');
       setTimeout(() => setPrintStatus('idle'), 3000);

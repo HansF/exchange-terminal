@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { ArrowLeft, Camera, AlertCircle, Zap, Printer, RefreshCw } from 'lucide-react';
 import { CameraBridge } from '../components/CameraBridge';
+import { printd } from '../lib/printd';
 
 type AppState = 'IDLE' | 'ANALYZING' | 'PRINTING' | 'SUCCESS' | 'ERROR';
 
@@ -52,7 +53,6 @@ export default function StencilCam({ onBack }: Props) {
       });
 
       // 3. Send to printer
-      const { printd } = await import('../lib/printd');
       await printd.print(imageData);
 
       setState('SUCCESS');
