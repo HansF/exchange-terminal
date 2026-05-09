@@ -102,6 +102,8 @@ npm run server       # express API only (requires printd reachable)
 npm run dev:full     # both, side by side via concurrently
 npm run build        # production build → dist/
 npm run preview      # serve the production build locally
+npm run test:e2e:install  # one-time: download the headless Chromium for tests
+npm run test:e2e          # run Playwright E2E tests (mocks printd + Gemini)
 npm run lint         # tsc --noEmit
 ```
 
