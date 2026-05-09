@@ -1,4 +1,4 @@
-import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image } from 'lucide-react';
+import { Receipt, Sparkles, ArrowRight, Camera, Image } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { ToolPage } from '../App';
 
@@ -35,13 +35,6 @@ const APPS: Array<{
     accent: 'bg-[#E0FF4F]',
   },
   {
-    page: 'todo',
-    title: 'Focus Timer',
-    description: 'Track focus sessions and print a running paper log for the day.',
-    icon: Timer,
-    accent: 'bg-white',
-  },
-  {
     page: 'threshold',
     title: 'Threshold Stencil',
     description: 'Upload an image, tune the threshold, then export or print a 1-bit stencil.',
@@ -62,7 +55,7 @@ export default function Home({ onNavigate }: Props) {
         </p>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
+      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {APPS.map((app) => {
           const Icon = app.icon;
           return (
