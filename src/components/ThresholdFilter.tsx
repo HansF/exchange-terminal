@@ -1,6 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, RefreshCw, Printer } from 'lucide-react';
 import { printd } from '../lib/printd';
+import {
+  applyThreshold,
+  MAX_THRESHOLD,
+  MIN_THRESHOLD,
+  thresholdPercent,
+} from '../lib/threshold';
 
 interface ThresholdFilterProps {
   imageSrc: string;
@@ -30,12 +36,7 @@ export const ThresholdFilter: React.FC<ThresholdFilterProps> = ({ imageSrc, onRe
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        const v = 0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2];
-        const binary = v >= threshold ? 255 : 0;
-        data[i] = binary; data[i + 1] = binary; data[i + 2] = binary;
-      }
+      applyThreshold(imageData.data, threshold);
       ctx.putImageData(imageData, 0, 0);
       setOutputUrl(canvas.toDataURL('image/png'));
     };
@@ -76,12 +77,12 @@ export const ThresholdFilter: React.FC<ThresholdFilterProps> = ({ imageSrc, onRe
       <div className="flex flex-col gap-4 bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="flex items-center justify-between font-black text-sm tracking-tighter uppercase mb-2">
           <span>Threshold</span>
-          <span>{Math.round((threshold / 255) * 100)}%</span>
+          <span>{thresholdPercent(threshold)}%</span>
         </div>
         <input
           type="range"
-          min="0"
-          max="255"
+          min={MIN_THRESHOLD}
+          max={MAX_THRESHOLD}
           value={threshold}
           onChange={(e) => setThreshold(parseInt(e.target.value))}
           className="w-full h-4 bg-gray-200 appearance-none border-2 border-black cursor-pointer accent-black mb-4"
