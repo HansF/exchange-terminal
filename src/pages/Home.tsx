@@ -35,13 +35,6 @@ const APPS: Array<{
     accent: 'bg-[#E0FF4F]',
   },
   {
-    page: 'todo',
-    title: 'Focus Timer',
-    description: 'Track focus sessions and print a running paper log for the day.',
-    icon: Timer,
-    accent: 'bg-white',
-  },
-  {
     page: 'threshold',
     title: 'Threshold Stencil',
     description: 'Upload an image, tune the threshold, then export or print a 1-bit stencil.',
