@@ -1,4 +1,4 @@
-import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image } from 'lucide-react';
+import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image, Heart } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { ToolPage } from '../App';
 
@@ -41,6 +41,13 @@ const APPS: Array<{
     icon: Image,
     accent: 'bg-[#38bdf8]',
   },
+  {
+    page: 'coupon',
+    title: 'Compliment Coupons',
+    description: 'Generate genuine compliment coupons, print them on thermal paper. Spread joy.',
+    icon: Heart,
+    accent: 'bg-[#FF90E8]',
+  },
 ];
 
 export default function Home({ onNavigate }: Props) {
@@ -55,7 +62,7 @@ export default function Home({ onNavigate }: Props) {
         </p>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6">
+      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-6">
         {APPS.map((app) => {
           const Icon = app.icon;
           return (
