@@ -13,8 +13,7 @@ import {
 // One RGBA pixel = 4 entries [R, G, B, A].
 const pixel = (r: number, g: number, b: number, a = 255): number[] => [r, g, b, a];
 
-const buf = (...pixels: number[][]): Uint8ClampedArray =>
-  new Uint8ClampedArray(pixels.flat());
+const buf = (...pixels: number[][]): Uint8ClampedArray => new Uint8ClampedArray(pixels.flat());
 
 describe('luminance', () => {
   it('uses Rec. 709 weights', () => {
@@ -112,11 +111,7 @@ describe('applyThreshold', () => {
   });
 
   it('is idempotent — applying twice yields the same buffer', () => {
-    const data = buf(
-      pixel(10, 20, 30),
-      pixel(200, 210, 220),
-      pixel(128, 128, 128),
-    );
+    const data = buf(pixel(10, 20, 30), pixel(200, 210, 220), pixel(128, 128, 128));
     applyThreshold(data, 128);
     const once = Array.from(data);
     applyThreshold(data, 128);

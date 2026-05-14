@@ -14,10 +14,14 @@ test.describe('StencilCam → caricature → print pipeline', () => {
     await page.getByRole('button', { name: /stencilcam/i }).click();
     await expect(page.getByRole('heading', { name: 'STENCILCAM' })).toBeVisible();
 
-    await page.waitForFunction(() => {
-      const v = document.querySelector('video') as HTMLVideoElement | null;
-      return !!v && v.videoWidth > 0 && v.videoHeight > 0;
-    }, undefined, { timeout: 15_000 });
+    await page.waitForFunction(
+      () => {
+        const v = document.querySelector('video') as HTMLVideoElement | null;
+        return !!v && v.videoWidth > 0 && v.videoHeight > 0;
+      },
+      undefined,
+      { timeout: 15_000 },
+    );
 
     // Shutter button is the only <button> nested inside the camera frame.
     await page.locator('video').locator('xpath=ancestor::div[1]').locator('button').click();
@@ -34,14 +38,20 @@ test.describe('StencilCam → caricature → print pipeline', () => {
     await page.goto('/');
     await page.getByRole('button', { name: /stencilcam/i }).click();
 
-    await page.waitForFunction(() => {
-      const v = document.querySelector('video') as HTMLVideoElement | null;
-      return !!v && v.videoWidth > 0;
-    }, undefined, { timeout: 15_000 });
+    await page.waitForFunction(
+      () => {
+        const v = document.querySelector('video') as HTMLVideoElement | null;
+        return !!v && v.videoWidth > 0;
+      },
+      undefined,
+      { timeout: 15_000 },
+    );
 
     await page.locator('video').locator('xpath=ancestor::div[1]').locator('button').click();
 
-    await expect(page.getByRole('heading', { name: /system failure/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /system failure/i })).toBeVisible({
+      timeout: 15_000,
+    });
     expect(printd.prints).toHaveLength(0);
 
     await page.getByRole('button', { name: /try again/i }).click();

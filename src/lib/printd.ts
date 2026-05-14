@@ -41,7 +41,11 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, init);
   const text = await res.text();
   let body: unknown;
-  try { body = text ? JSON.parse(text) : null; } catch { body = { error: text }; }
+  try {
+    body = text ? JSON.parse(text) : null;
+  } catch {
+    body = { error: text };
+  }
   if (!res.ok || (body as { error?: string })?.error) {
     const err = (body as { error?: string })?.error || `HTTP ${res.status}`;
     throw new Error(`printd ${path}: ${err}`);

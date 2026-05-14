@@ -22,7 +22,9 @@ export default function Fortune({ onBack }: Props) {
     setError('');
 
     // Wait one frame for React to render the ticket with the new fortune
-    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
 
     try {
       const el = ticketRef.current;
@@ -39,8 +41,11 @@ export default function Fortune({ onBack }: Props) {
   };
 
   const now = new Date().toLocaleString('en-US', {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   return (
@@ -72,14 +77,23 @@ export default function Fortune({ onBack }: Props) {
           className={`border-4 border-black font-black text-xl py-5 px-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest ${status === 'error' ? 'bg-red-400 text-black' : 'bg-black text-[#FFE135]'}`}
           title={status === 'error' ? error : 'Draw and print your fortune'}
         >
-          {status === 'loading' ? <Sparkles className="w-6 h-6 animate-spin" /> : <Printer className="w-6 h-6" />}
-          {status === 'loading' ? 'Printing…' :
-           status === 'success' ? 'Fortune Sent!' :
-           status === 'error'   ? 'Error — Try Again' :
-           'Draw Your Fortune'}
+          {status === 'loading' ? (
+            <Sparkles className="w-6 h-6 animate-spin" />
+          ) : (
+            <Printer className="w-6 h-6" />
+          )}
+          {status === 'loading'
+            ? 'Printing…'
+            : status === 'success'
+              ? 'Fortune Sent!'
+              : status === 'error'
+                ? 'Error — Try Again'
+                : 'Draw Your Fortune'}
         </button>
         {status === 'error' && (
-          <p className="text-xs font-bold bg-red-400 border-2 border-black px-3 py-1 max-w-sm text-center">{error}</p>
+          <p className="text-xs font-bold bg-red-400 border-2 border-black px-3 py-1 max-w-sm text-center">
+            {error}
+          </p>
         )}
       </div>
 
@@ -102,19 +116,21 @@ export default function Fortune({ onBack }: Props) {
 
           {/* Fortune text */}
           <div className="mb-6 py-2">
-            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">Prophecy</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest mb-3 border-b border-dashed border-black pb-1">
+              Prophecy
+            </div>
             <p className="text-base font-bold leading-snug italic">{fortune}</p>
           </div>
 
           {/* Decorative divider */}
-          <div className="text-center text-sm font-bold my-4 tracking-widest">
-            — ✦ —
-          </div>
+          <div className="text-center text-sm font-bold my-4 tracking-widest">— ✦ —</div>
 
           {/* Footer */}
           <div className="border-t border-black pt-3 text-center">
             <div className="text-[10px] font-bold mb-2">{now}</div>
-            <div className="text-[11px] font-bold tracking-widest uppercase">— Oracle Dispatch —</div>
+            <div className="text-[11px] font-bold tracking-widest uppercase">
+              — Oracle Dispatch —
+            </div>
           </div>
         </div>
       </div>

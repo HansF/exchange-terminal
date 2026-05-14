@@ -11,7 +11,9 @@ test.describe('Fortune → print pipeline', () => {
 
     await page.getByRole('button', { name: /draw your fortune/i }).click();
 
-    await expect(page.getByRole('button', { name: /fortune sent!/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /fortune sent!/i })).toBeVisible({
+      timeout: 15_000,
+    });
 
     expect(printd.prints).toHaveLength(1);
     const captured = printd.prints[0];
@@ -26,7 +28,9 @@ test.describe('Fortune → print pipeline', () => {
     await page.getByRole('button', { name: /the oracle/i }).click();
     await page.getByRole('button', { name: /draw your fortune/i }).click();
 
-    await expect(page.getByRole('button', { name: /error — try again/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('button', { name: /error — try again/i })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText(/printd|unreachable|simulated/i)).toBeVisible();
   });
 });

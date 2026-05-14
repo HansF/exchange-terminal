@@ -1,8 +1,6 @@
 {
   "name": "Exchange Terminal",
   "description": "Paper-receipt apps for exchange tickets, fortunes, focus sessions, AI caricatures, and image stencils.",
-  "requestFramePermissions": [
-    "camera"
-  ],
+  "requestFramePermissions": ["camera"],
   "majorCapabilities": []
 }

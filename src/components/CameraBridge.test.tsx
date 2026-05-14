@@ -12,7 +12,7 @@ const createMockTrack = () => ({
 const createMockStream = (tracks = [createMockTrack()]) =>
   ({
     getTracks: () => tracks,
-  } as unknown as MediaStream);
+  }) as unknown as MediaStream;
 
 const installMediaDevices = (getUserMedia: GetUserMedia) => {
   Object.defineProperty(navigator, 'mediaDevices', {

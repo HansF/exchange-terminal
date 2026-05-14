@@ -15,10 +15,7 @@ export function luminance(r: number, g: number, b: number): number {
 // Mutates the RGBA buffer in place: each pixel becomes pure black or pure
 // white based on the Rec. 709 luma against the threshold. Alpha is preserved.
 // Pixels with luma >= threshold map to white; below map to black.
-export function applyThreshold(
-  data: Uint8ClampedArray | number[],
-  threshold: number,
-): void {
+export function applyThreshold(data: Uint8ClampedArray | number[], threshold: number): void {
   for (let i = 0; i < data.length; i += 4) {
     const v = luminance(data[i], data[i + 1], data[i + 2]);
     const binary = v >= threshold ? 255 : 0;

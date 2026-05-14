@@ -8,12 +8,12 @@ import ThresholdStencil from './pages/ThresholdStencil';
 
 const TOOL_PAGES = ['exchange', 'fortune', 'stencilcam', 'todo', 'threshold'] as const;
 
-export type ToolPage = typeof TOOL_PAGES[number];
+export type ToolPage = (typeof TOOL_PAGES)[number];
 type Page = 'home' | ToolPage;
 
 function pageFromHash(): Page {
   const hash = window.location.hash.slice(1);
-  return TOOL_PAGES.includes(hash as ToolPage) ? hash as ToolPage : 'home';
+  return TOOL_PAGES.includes(hash as ToolPage) ? (hash as ToolPage) : 'home';
 }
 
 export default function App() {

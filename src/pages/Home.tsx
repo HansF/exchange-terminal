@@ -16,7 +16,8 @@ const APPS: Array<{
   {
     page: 'exchange',
     title: 'Exchange Tickets',
-    description: 'Generate printable receipts for offerings and demands. Prints to thermal printer.',
+    description:
+      'Generate printable receipts for offerings and demands. Prints to thermal printer.',
     icon: Receipt,
     accent: 'bg-[#E0FF4F]',
   },
@@ -68,11 +69,11 @@ export default function Home({ onNavigate }: Props) {
                 <div className="bg-white border-2 border-black p-2 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] shrink-0">
                   <Icon className="w-7 h-7 text-black" />
                 </div>
-                <h2 className="text-lg font-black uppercase leading-tight break-words">{app.title}</h2>
+                <h2 className="text-lg font-black uppercase leading-tight break-words">
+                  {app.title}
+                </h2>
               </div>
-              <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                {app.description}
-              </p>
+              <p className="text-sm font-medium text-gray-700 leading-relaxed">{app.description}</p>
               <div className="flex items-center gap-2 font-black uppercase text-sm mt-auto pt-4 border-t-2 border-black group-hover:gap-3 transition-all">
                 Open <ArrowRight className="w-4 h-4" />
               </div>

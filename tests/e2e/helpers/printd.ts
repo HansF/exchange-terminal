@@ -23,7 +23,7 @@ export interface PrintdMock {
  */
 export async function mockPrintd(
   page: Page,
-  opts: { failPrint?: boolean; failCaricature?: boolean } = {}
+  opts: { failPrint?: boolean; failCaricature?: boolean } = {},
 ): Promise<PrintdMock> {
   const state: PrintdMock = { prints: [], cuts: 0, feeds: [] };
 
@@ -85,7 +85,7 @@ export async function mockPrintd(
         bottom_pad_rows: 0,
         feed_before_cut: 3,
       }),
-    })
+    }),
   );
 
   await page.route('**/api/healthz', async (route: Route) =>
@@ -93,7 +93,7 @@ export async function mockPrintd(
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ ok: true, printer: 'mock', kind: 'dummy', target: 'mock' }),
-    })
+    }),
   );
 
   await page.route('**/api/caricature', async (route: Route) => {

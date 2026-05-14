@@ -40,10 +40,7 @@ beforeEach(() => {
     getImageData: vi.fn(() => ({
       // 4 pixels: black, mid-grey-ish (luma 128), bright, near-white
       data: new Uint8ClampedArray([
-        10, 10, 10, 255,
-        128, 128, 128, 255,
-        200, 200, 200, 255,
-        250, 250, 250, 255,
+        10, 10, 10, 255, 128, 128, 128, 255, 200, 200, 200, 255, 250, 250, 250, 255,
       ]),
       width: 4,
       height: 1,
@@ -52,11 +49,10 @@ beforeEach(() => {
     putImageData: vi.fn(),
   };
 
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => fakeCtx) as unknown as
-    typeof HTMLCanvasElement.prototype.getContext;
-  HTMLCanvasElement.prototype.toDataURL = vi.fn(
-    () => 'data:image/png;base64,STUB',
-  );
+  HTMLCanvasElement.prototype.getContext = vi.fn(
+    () => fakeCtx,
+  ) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+  HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/png;base64,STUB');
 
   vi.stubGlobal(
     'Image',
@@ -128,10 +124,7 @@ describe('<ThresholdFilter />', () => {
     // Pixel 0 (10,10,10) → black; pixel 1 (128,128,128) → white (>=);
     // pixels 2 and 3 → white. Alpha preserved.
     expect(Array.from(written.data)).toEqual([
-      0, 0, 0, 255,
-      255, 255, 255, 255,
-      255, 255, 255, 255,
-      255, 255, 255, 255,
+      0, 0, 0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
     ]);
   });
 

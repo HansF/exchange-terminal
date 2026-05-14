@@ -15,7 +15,12 @@ async function printdFetch(pathname, init = {}) {
   if (PRINT_SERVICE_KEY) headers['Authorization'] = `Bearer ${PRINT_SERVICE_KEY}`;
   const r = await fetch(`${PRINT_SERVICE_URL}${pathname}`, { ...init, headers });
   const text = await r.text();
-  let body; try { body = JSON.parse(text); } catch { body = { error: text }; }
+  let body;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    body = { error: text };
+  }
   return { ok: r.ok, status: r.status, body };
 }
 
@@ -70,15 +75,27 @@ app.get('/api/sessions', (_req, res) => {
 app.post('/api/sessions', (req, res) => {
   const s = req.body;
   if (!s.id || !s.startedAt) return res.status(400).json({ error: 'invalid session' });
-  db.prepare(`
+  db.prepare(
+    `
     INSERT INTO sessions (id, started_at, ended_at, duration_seconds, planned_seconds, was_abandoned, tags, rating)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(s.id, s.startedAt, s.endedAt, s.durationSeconds, s.plannedSeconds, s.wasAbandoned ? 1 : 0, JSON.stringify(s.tags ?? []), s.rating ?? null);
+  `,
+  ).run(
+    s.id,
+    s.startedAt,
+    s.endedAt,
+    s.durationSeconds,
+    s.plannedSeconds,
+    s.wasAbandoned ? 1 : 0,
+    JSON.stringify(s.tags ?? []),
+    s.rating ?? null,
+  );
   res.json({ ok: true });
 });
 
 app.delete('/api/sessions/today', (_req, res) => {
-  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
   db.prepare('DELETE FROM sessions WHERE started_at >= ?').run(start.getTime());
   res.json({ ok: true });
 });
@@ -91,7 +108,9 @@ function todayKey() {
 
 app.get('/api/day', (_req, res) => {
   const row = db.prepare('SELECT * FROM day_log WHERE date = ?').get(todayKey());
-  res.json(row ? { date: row.date, startedAt: row.started_at, endedAt: row.ended_at ?? null } : null);
+  res.json(
+    row ? { date: row.date, startedAt: row.started_at, endedAt: row.ended_at ?? null } : null,
+  );
 });
 
 app.post('/api/day/start', (_req, res) => {
@@ -108,7 +127,8 @@ app.post('/api/day/end', (_req, res) => {
 
 app.post('/api/day/reset', (_req, res) => {
   const key = todayKey();
-  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
   db.prepare('DELETE FROM day_log WHERE date = ?').run(key);
   db.prepare('DELETE FROM sessions WHERE started_at >= ?').run(start.getTime());
   res.json({ ok: true });
@@ -142,8 +162,14 @@ function relayJson(method, path, transformBody) {
 
 app.get('/api/healthz', relayJson('GET', '/healthz'));
 app.get('/api/status', relayJson('GET', '/status'));
-app.post('/api/feed', relayJson('POST', '/feed', b => ({ lines: b.lines ?? 3 })));
-app.post('/api/cut', relayJson('POST', '/cut', b => ({ partial: !!b.partial })));
+app.post(
+  '/api/feed',
+  relayJson('POST', '/feed', (b) => ({ lines: b.lines ?? 3 })),
+);
+app.post(
+  '/api/cut',
+  relayJson('POST', '/cut', (b) => ({ partial: !!b.partial })),
+);
 
 app.post('/api/print', async (req, res) => {
   const { imageData, cut = true } = req.body || {};
@@ -217,11 +243,11 @@ Return only the image.`,
     const finishReason = candidate?.finishReason || 'UNKNOWN';
     const promptFeedback = response.promptFeedback;
     const textParts = (candidate?.content?.parts || [])
-      .map(p => p.text)
+      .map((p) => p.text)
       .filter(Boolean)
       .join(' ')
       .slice(0, 300);
-    const safety = candidate?.safetyRatings?.filter(r => r.blocked || r.probability === 'HIGH');
+    const safety = candidate?.safetyRatings?.filter((r) => r.blocked || r.probability === 'HIGH');
 
     console.error('[caricature] no image returned', {
       model: imageModel,
@@ -233,8 +259,9 @@ Return only the image.`,
 
     let detail = `finishReason=${finishReason}`;
     if (textParts) detail += `; model said: "${textParts}"`;
-    if (safety?.length) detail += `; safety: ${safety.map(s => s.category).join(', ')}`;
-    if (promptFeedback?.blockReason) detail += `; promptFeedback.blockReason=${promptFeedback.blockReason}`;
+    if (safety?.length) detail += `; safety: ${safety.map((s) => s.category).join(', ')}`;
+    if (promptFeedback?.blockReason)
+      detail += `; promptFeedback.blockReason=${promptFeedback.blockReason}`;
 
     throw new Error(`Model ${imageModel} returned no image (${detail})`);
   } catch (err) {

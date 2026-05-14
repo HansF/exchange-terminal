@@ -19,9 +19,11 @@ export async function injectFakeCamera(page: Page): Promise<void> {
       ctx.fillRect(100, 100, 200, 200);
       // Re-draw on a tick so the video element has fresh frames; capturing a
       // static canvas works for one frame, which is all StencilCam needs.
-      const stream = (canvas as HTMLCanvasElement & {
-        captureStream(frameRate?: number): MediaStream;
-      }).captureStream(30);
+      const stream = (
+        canvas as HTMLCanvasElement & {
+          captureStream(frameRate?: number): MediaStream;
+        }
+      ).captureStream(30);
       return stream;
     };
 
@@ -32,7 +34,12 @@ export async function injectFakeCamera(page: Page): Promise<void> {
         ...mediaDevices,
         getUserMedia: async () => fakeStream(),
         enumerateDevices: async () => [
-          { kind: 'videoinput', deviceId: 'fake', groupId: 'fake', label: 'fake' } as MediaDeviceInfo,
+          {
+            kind: 'videoinput',
+            deviceId: 'fake',
+            groupId: 'fake',
+            label: 'fake',
+          } as MediaDeviceInfo,
         ],
       },
     });

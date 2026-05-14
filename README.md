@@ -16,13 +16,13 @@ The actual ESC/POS plumbing lives in a separate, reusable service: **[printd](ht
 
 Five apps under one launcher (`src/pages/Home.tsx`):
 
-| App | What it does |
-|---|---|
-| **Exchange Terminal** | Generates printable offering / demand / mutual-aid tickets in four visual themes (Standard, Mystical, DIY Punk, Terminal). |
-| **Fortune** | An "oracle" — draws a random prophecy and prints it as a receipt. |
-| **Todo** | A focus-session timer with paper artefacts: prints a daily header at start, a session summary on each completion, and an end-of-day recap. |
-| **StencilCam** | Snaps a photo, asks Gemini for a flattering black-and-white caricature, thresholds it, and prints the result. |
-| **Threshold Stencil** | Upload an image, dial in a threshold, export or print it as a 1-bit stencil. |
+| App                   | What it does                                                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Exchange Terminal** | Generates printable offering / demand / mutual-aid tickets in four visual themes (Standard, Mystical, DIY Punk, Terminal).                 |
+| **Fortune**           | An "oracle" — draws a random prophecy and prints it as a receipt.                                                                          |
+| **Todo**              | A focus-session timer with paper artefacts: prints a daily header at start, a session summary on each completion, and an end-of-day recap. |
+| **StencilCam**        | Snaps a photo, asks Gemini for a flattering black-and-white caricature, thresholds it, and prints the result.                              |
+| **Threshold Stencil** | Upload an image, dial in a threshold, export or print it as a 1-bit stencil.                                                               |
 
 Templated receipt views use [`src/lib/print.ts`](src/lib/print.ts) to capture DOM with `html2canvas` at exactly **570 px** wide, threshold to 1-bit on the client, and send the PNG through the typed printd wrapper in [`src/lib/printd.ts`](src/lib/printd.ts). StencilCam and Threshold Stencil generate their own thresholded PNGs and use the same print client.
 
@@ -42,6 +42,7 @@ Templated receipt views use [`src/lib/print.ts`](src/lib/print.ts) to capture DO
 ```
 
 `server.cjs` does three things:
+
 1. **Storage** for the Todo app — a tiny persistent `data/todo.db` (sqlite) holding sessions and day logs.
 2. **Gemini proxy** for StencilCam — keeps the API key server-side.
 3. **printd proxy** — relays `/api/print`, `/api/cut`, `/api/feed`, `/api/status`, `/api/healthz` to the printd service so the bearer token never reaches the browser.
@@ -116,9 +117,9 @@ npm run lint         # tsc --noEmit
 ```ts
 import { printd } from './lib/printd';
 
-await printd.health();                          // liveness probe
-await printd.status();                          // printer config + last error
-await printd.print(pngDataUrl, { cut: true });  // print a PNG
+await printd.health(); // liveness probe
+await printd.status(); // printer config + last error
+await printd.print(pngDataUrl, { cut: true }); // print a PNG
 await printd.feed(3);
 await printd.cut();
 ```

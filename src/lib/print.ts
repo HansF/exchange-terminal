@@ -29,7 +29,9 @@ export async function captureTicketPng(el: HTMLElement): Promise<string> {
   for (let i = 0; i < d.length; i += 4) {
     const b = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
     const v = b > 128 ? 255 : 0;
-    d[i] = v; d[i + 1] = v; d[i + 2] = v;
+    d[i] = v;
+    d[i + 1] = v;
+    d[i + 2] = v;
   }
   ctx.putImageData(img, 0, 0);
   return out.toDataURL('image/png');

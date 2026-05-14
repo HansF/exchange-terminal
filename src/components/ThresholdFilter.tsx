@@ -1,12 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download, RefreshCw, Printer } from 'lucide-react';
 import { printd } from '../lib/printd';
-import {
-  applyThreshold,
-  MAX_THRESHOLD,
-  MIN_THRESHOLD,
-  thresholdPercent,
-} from '../lib/threshold';
+import { applyThreshold, MAX_THRESHOLD, MIN_THRESHOLD, thresholdPercent } from '../lib/threshold';
 
 interface ThresholdFilterProps {
   imageSrc: string;
@@ -112,9 +107,13 @@ export const ThresholdFilter: React.FC<ThresholdFilterProps> = ({ imageSrc, onRe
           title={printStatus === 'error' ? printError : 'Print to thermal printer'}
         >
           <Printer className="w-5 h-5" />
-          {printStatus === 'loading' ? 'Printing…' :
-           printStatus === 'success' ? 'Sent!' :
-           printStatus === 'error'   ? 'Error' : 'Print Stencil'}
+          {printStatus === 'loading'
+            ? 'Printing…'
+            : printStatus === 'success'
+              ? 'Sent!'
+              : printStatus === 'error'
+                ? 'Error'
+                : 'Print Stencil'}
         </button>
       </div>
     </div>

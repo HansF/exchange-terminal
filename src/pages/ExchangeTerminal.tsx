@@ -1,4 +1,13 @@
-import { Printer, Download, Receipt, Code, Sparkles, Skull, Terminal, ArrowLeft } from 'lucide-react';
+import {
+  Printer,
+  Download,
+  Receipt,
+  Code,
+  Sparkles,
+  Skull,
+  Terminal,
+  ArrowLeft,
+} from 'lucide-react';
 import React, { useState } from 'react';
 import html2canvas from 'html2canvas';
 import { printTicket } from '../lib/print';
@@ -18,7 +27,7 @@ const THEMES = {
     subClass: 'text-xs font-bold mt-2',
     dividerClass: 'border-b border-black border-dashed pb-1 mb-2',
     textClass: 'text-sm font-medium',
-    footerClass: 'border-t border-black pt-4'
+    footerClass: 'border-t border-black pt-4',
   },
   magic: {
     id: 'magic',
@@ -31,7 +40,7 @@ const THEMES = {
     subClass: 'text-xs font-bold mt-2',
     dividerClass: 'border-b border-black border-dotted pb-1 mb-2',
     textClass: 'text-sm italic font-bold',
-    footerClass: 'border-t border-dotted border-black pt-4'
+    footerClass: 'border-t border-dotted border-black pt-4',
   },
   punk: {
     id: 'punk',
@@ -44,7 +53,7 @@ const THEMES = {
     subClass: 'text-[10px] font-black mt-1 block w-full text-center',
     dividerClass: 'border-b-[2px] border-black pb-1 mb-2',
     textClass: 'text-base font-bold uppercase leading-tight tracking-tight',
-    footerClass: 'border-t-[2px] border-black pt-4'
+    footerClass: 'border-t-[2px] border-black pt-4',
   },
   system: {
     id: 'system',
@@ -57,8 +66,8 @@ const THEMES = {
     subClass: 'text-xs mt-2',
     dividerClass: 'border-b border-black pb-1 mb-2',
     textClass: 'text-xs font-bold uppercase',
-    footerClass: 'border-t border-black pt-4'
-  }
+    footerClass: 'border-t border-black pt-4',
+  },
 };
 
 interface Props {
@@ -79,7 +88,11 @@ export default function ExchangeTerminal({ onBack }: Props) {
   const captureTicketCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const element = document.getElementById('ticket-container');
     if (!element) return null;
-    const canvas = await html2canvas(element, { scale: 4, backgroundColor: '#FFFFFF', logging: false });
+    const canvas = await html2canvas(element, {
+      scale: 4,
+      backgroundColor: '#FFFFFF',
+      logging: false,
+    });
     const ctx = canvas.getContext('2d');
     if (ctx) {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -87,7 +100,9 @@ export default function ExchangeTerminal({ onBack }: Props) {
       for (let i = 0; i < data.length; i += 4) {
         const brightness = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
         const color = brightness > 128 ? 255 : 0;
-        data[i] = color; data[i + 1] = color; data[i + 2] = color;
+        data[i] = color;
+        data[i + 1] = color;
+        data[i + 2] = color;
       }
       ctx.putImageData(imageData, 0, 0);
     }
@@ -183,7 +198,6 @@ export default function ExchangeTerminal({ onBack }: Props) {
 
       <div className="max-w-5xl mx-auto w-full flex flex-col lg:flex-row gap-8 items-start flex-1">
         <div className="w-full lg:w-1/2 bg-white p-6 border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] no-print">
-
           <div className="mb-6 border-b-2 border-black pb-6">
             <h3 className="font-black uppercase mb-3 text-lg">1. Select Mode</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -196,7 +210,9 @@ export default function ExchangeTerminal({ onBack }: Props) {
                   key={type.id}
                   onClick={() => setTicketType(type.id as TicketType)}
                   className={`border-2 border-black font-bold py-2 px-2 text-sm transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] ${
-                    ticketType === type.id ? 'bg-black text-white' : 'bg-[#E0FF4F] text-black hover:bg-yellow-300'
+                    ticketType === type.id
+                      ? 'bg-black text-white'
+                      : 'bg-[#E0FF4F] text-black hover:bg-yellow-300'
                   }`}
                 >
                   {type.label}
@@ -208,14 +224,16 @@ export default function ExchangeTerminal({ onBack }: Props) {
           <div className="mb-6 border-b-2 border-black pb-6">
             <h3 className="font-black uppercase mb-3 text-lg">2. Visual Theme</h3>
             <div className="grid grid-cols-2 gap-3">
-              {(Object.values(THEMES)).map((t) => {
+              {Object.values(THEMES).map((t) => {
                 const Icon = t.icon;
                 return (
                   <button
                     key={t.id}
                     onClick={() => setTheme(t.id as Theme)}
                     className={`border-2 border-black font-bold py-2 px-3 text-sm flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] ${
-                      theme === t.id ? 'bg-black text-white' : 'bg-[#FF90E8] text-black hover:bg-pink-400'
+                      theme === t.id
+                        ? 'bg-black text-white'
+                        : 'bg-[#FF90E8] text-black hover:bg-pink-400'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -278,7 +296,6 @@ export default function ExchangeTerminal({ onBack }: Props) {
         </div>
 
         <div className="w-full lg:w-1/2 flex flex-col items-center">
-
           <div className="no-print w-full grid grid-cols-3 gap-2 mb-6">
             <button
               onClick={exportHTML}
@@ -304,15 +321,21 @@ export default function ExchangeTerminal({ onBack }: Props) {
             >
               <Printer className="w-5 h-5" />
               <span>
-                {printStatus === 'loading' ? 'Printing…' :
-                 printStatus === 'success' ? 'Sent!' :
-                 printStatus === 'error'   ? 'Error' : 'Print'}
+                {printStatus === 'loading'
+                  ? 'Printing…'
+                  : printStatus === 'success'
+                    ? 'Sent!'
+                    : printStatus === 'error'
+                      ? 'Error'
+                      : 'Print'}
               </span>
             </button>
           </div>
 
           <div className="bg-gray-200 border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full flex justify-center no-print overflow-x-auto relative">
-             <div className="absolute top-2 left-2 text-xs font-black uppercase text-gray-400">POS Simulator</div>
+            <div className="absolute top-2 left-2 text-xs font-black uppercase text-gray-400">
+              POS Simulator
+            </div>
 
             <div
               id="ticket-container"
@@ -322,19 +345,18 @@ export default function ExchangeTerminal({ onBack }: Props) {
               style={{ fontSmoothing: 'none', WebkitFontSmoothing: 'none' } as React.CSSProperties}
             >
               <div className="text-center mb-6" data-id="ticket-header">
-                <h2 className={activeTheme.titleClass}>
-                  {activeTheme.header}
-                </h2>
-                <div className={activeTheme.subClass}>
-                  {activeTheme.sub}
-                </div>
+                <h2 className={activeTheme.titleClass}>{activeTheme.header}</h2>
+                <div className={activeTheme.subClass}>{activeTheme.sub}</div>
               </div>
 
               <div className="mb-6">
                 <div className={activeTheme.dividerClass}>
                   <div className="text-xs uppercase font-bold">Name / Alias</div>
                 </div>
-                <div className="text-lg font-bold uppercase break-words leading-tight" data-id="ticket-name">
+                <div
+                  className="text-lg font-bold uppercase break-words leading-tight"
+                  data-id="ticket-name"
+                >
                   {name.trim() || 'ANONYMOUS'}
                 </div>
               </div>
@@ -347,7 +369,10 @@ export default function ExchangeTerminal({ onBack }: Props) {
                       <span>(OFFER)</span>
                     </div>
                   </div>
-                  <div className={`break-words whitespace-pre-wrap leading-snug ${activeTheme.textClass}`} data-id="ticket-offer">
+                  <div
+                    className={`break-words whitespace-pre-wrap leading-snug ${activeTheme.textClass}`}
+                    data-id="ticket-offer"
+                  >
                     {offering.trim() || 'NO OFFER PROVIDED'}
                   </div>
                 </div>
@@ -361,7 +386,10 @@ export default function ExchangeTerminal({ onBack }: Props) {
                       <span>(DEMAND)</span>
                     </div>
                   </div>
-                  <div className={`break-words whitespace-pre-wrap leading-snug ${activeTheme.textClass}`} data-id="ticket-demand">
+                  <div
+                    className={`break-words whitespace-pre-wrap leading-snug ${activeTheme.textClass}`}
+                    data-id="ticket-demand"
+                  >
                     {demand.trim() || 'NO DEMAND PROVIDED'}
                   </div>
                 </div>
@@ -378,12 +406,17 @@ export default function ExchangeTerminal({ onBack }: Props) {
                   })}
                 </div>
                 <div className="text-[12px] uppercase font-bold tracking-widest">
-                  — {ticketType === 'both' ? 'MUTUAL AID' : (ticketType === 'offer' ? 'GIFT' : 'REQUEST')} —
+                  —{' '}
+                  {ticketType === 'both'
+                    ? 'MUTUAL AID'
+                    : ticketType === 'offer'
+                      ? 'GIFT'
+                      : 'REQUEST'}{' '}
+                  —
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

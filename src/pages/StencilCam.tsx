@@ -43,7 +43,9 @@ export default function StencilCam({ onBack }: Props) {
           for (let i = 0; i < px.length; i += 4) {
             const v = 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2];
             const b = v >= 128 ? 255 : 0;
-            px[i] = b; px[i + 1] = b; px[i + 2] = b;
+            px[i] = b;
+            px[i + 1] = b;
+            px[i + 2] = b;
           }
           ctx.putImageData(data, 0, 0);
           resolve(canvas.toDataURL('image/png'));
@@ -108,7 +110,11 @@ export default function StencilCam({ onBack }: Props) {
             <div className="relative">
               <div className="w-24 h-24 border-8 border-black border-t-[#FFE135] rounded-full animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center">
-                {state === 'ANALYZING' ? <Camera className="w-8 h-8" /> : <Printer className="w-8 h-8" />}
+                {state === 'ANALYZING' ? (
+                  <Camera className="w-8 h-8" />
+                ) : (
+                  <Printer className="w-8 h-8" />
+                )}
               </div>
             </div>
             <div className="text-center px-8">
@@ -116,9 +122,7 @@ export default function StencilCam({ onBack }: Props) {
                 {state === 'ANALYZING' ? 'Drawing…' : 'Printing…'}
               </h2>
               <p className="font-bold uppercase tracking-widest text-gray-500 animate-pulse">
-                {state === 'ANALYZING'
-                  ? 'Sketching your portrait'
-                  : 'Sending to thermal printer'}
+                {state === 'ANALYZING' ? 'Sketching your portrait' : 'Sending to thermal printer'}
               </p>
             </div>
           </div>
@@ -128,10 +132,10 @@ export default function StencilCam({ onBack }: Props) {
           <div className="flex flex-col items-center justify-center gap-8 py-20 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] min-h-[400px]">
             <div className="text-6xl">🖨️</div>
             <div className="text-center px-8">
-              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2">
-                Printed!
-              </h2>
-              <p className="font-bold uppercase tracking-widest text-gray-500">Check the printer.</p>
+              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2">Printed!</h2>
+              <p className="font-bold uppercase tracking-widest text-gray-500">
+                Check the printer.
+              </p>
             </div>
             <button
               onClick={reset}

@@ -76,7 +76,13 @@ export const CameraBridge: React.FC<CameraBridgeProps> = ({ onCapture, isProcess
         </div>
       ) : (
         <>
-          <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover scale-x-[-1]" />
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover scale-x-[-1]"
+          />
           <canvas ref={canvasRef} className="hidden" />
 
           {!isProcessing && isActive && (
