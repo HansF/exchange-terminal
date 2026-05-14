@@ -1,4 +1,4 @@
-import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image } from 'lucide-react';
+import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image, GitMerge } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { ToolPage } from '../App';
 
@@ -40,6 +40,13 @@ const APPS: Array<{
     description: 'Upload an image, tune the threshold, then export or print a 1-bit stencil.',
     icon: Image,
     accent: 'bg-[#38bdf8]',
+  },
+  {
+    page: 'weave',
+    title: 'Connection Weave',
+    description: 'Turn exchange threads into a shared tapestry. Every offer and demand is a thread — matches are knots.',
+    icon: GitMerge,
+    accent: 'bg-[#FF90E8]',
   },
 ];
 

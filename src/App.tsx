@@ -5,8 +5,9 @@ import Fortune from './pages/Fortune';
 import StencilCam from './pages/StencilCam';
 import Todo from './pages/Todo';
 import ThresholdStencil from './pages/ThresholdStencil';
+import ConnectionWeave from './pages/ConnectionWeave';
 
-const TOOL_PAGES = ['exchange', 'fortune', 'stencilcam', 'todo', 'threshold'] as const;
+const TOOL_PAGES = ['exchange', 'fortune', 'stencilcam', 'todo', 'threshold', 'weave'] as const;
 
 export type ToolPage = typeof TOOL_PAGES[number];
 type Page = 'home' | ToolPage;
@@ -42,5 +43,6 @@ export default function App() {
   if (page === 'stencilcam') return <StencilCam onBack={() => setPage('home')} />;
   if (page === 'todo') return <Todo onBack={() => setPage('home')} />;
   if (page === 'threshold') return <ThresholdStencil onBack={() => setPage('home')} />;
+  if (page === 'weave') return <ConnectionWeave onBack={() => setPage('home')} />;
   return <Home onNavigate={(p) => setPage(p)} />;
 }
