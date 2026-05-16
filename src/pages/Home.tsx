@@ -1,4 +1,4 @@
-import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image } from 'lucide-react';
+import { Receipt, Sparkles, ArrowRight, Camera, Timer, Image, Palette } from 'lucide-react';
 import type { ComponentType } from 'react';
 import type { ToolPage } from '../App';
 
@@ -40,6 +40,13 @@ const APPS: Array<{
     description: 'Upload an image, tune the threshold, then export or print a 1-bit stencil.',
     icon: Image,
     accent: 'bg-[#38bdf8]',
+  },
+  {
+    page: 'pixel',
+    title: 'Pixel Studio',
+    description: 'Draw 16×16 pixel art and print it as a tiny art card. Bold and brutalist.',
+    icon: Palette,
+    accent: 'bg-[#FF90E8]',
   },
 ];
 
